@@ -167,6 +167,51 @@ void Fifth_Building(float x, float y, int m = 1, Color buildingWall = {130, 86, 
     polygon({{x + m * 5, y + 480}, {x + m * 65, y + 480}, {x + m * 65, y + 490}, {x + m * 5, y + 490}}, {67, 164, 97});
 }
 
+void cloudLower(float Tx, float Ty, float s, Color color)
+{
+    //first
+    circle(Tx + s * 2, Ty + s * 30, 60, 60, color);
+    circle(Tx + s * 13, Ty + s * 22, 93, 93, color);
+    circle(Tx + s * 24, Ty + s * 24, 83, 90, color);
+    circle(Tx + s * 40, Ty + s * 32, 120, 120, color);
+    circle(Tx + s * 54, Ty + s * 36, 77, 70, color);
+    circle(Tx + s * 60, Ty + s * 30, 77, 70, color);
+    circle(Tx + s * 66, Ty + s * 40, 77, 84, color);
+    circle(Tx + s * 74, Ty + s * 40, 100, 100, color);
+    circle(Tx + s * 85, Ty + s * 37, 77, 84, color);
+    circle(Tx + s * 85, Ty + s * 32, 77, 84, color);
+    circle(Tx + s * 95, Ty + s * 40, 107, 100, color);
+    circle(Tx + s * 108, Ty + s * 34, 67, 60, color);
+    circle(Tx + s * 122, Ty + s * 31, 100, 100, color);
+    circle(Tx + s * 132, Ty + s * 25, 100, 100, color);
+    circle(Tx + s * 144, Ty + s * 16, 60, 60, color);
+    quad({{12, 18}, {146, 18}, {146, 11}, {11, 10}}, color, Tx, Ty, s);
+    quad({{20, 32}, {138, 32}, {138, 17}, {20, 17}}, color, Tx, Ty, s);
+    quad({{12, 18}, {146, 18}, {146, 11}, {11, 10}}, color, Tx, Ty, s);
+    quad({{20, 32}, {138, 32}, {138, 17}, {20, 17}}, color, Tx, Ty, s);
+
+    //last
+    circle(Tx + s * 102, Ty + s * 30, 60, 60, color);
+    circle(Tx + s * 113, Ty + s * 16, 93, 93, color);
+    circle(Tx + s * 124, Ty + s * 24, 83, 90, color);
+    circle(Tx + s * 140, Ty + s * 32, 120, 120, color);
+    circle(Tx + s * 154, Ty + s * 36, 77, 70, color);
+    circle(Tx + s * 160, Ty + s * 30, 77, 70, color);
+    circle(Tx + s * 166, Ty + s * 40, 77, 84, color);
+    circle(Tx + s * 174, Ty + s * 40, 100, 100, color);
+    circle(Tx + s * 185, Ty + s * 37, 77, 84, color);
+    circle(Tx + s * 185, Ty + s * 32, 77, 84, color);
+    circle(Tx + s * 195, Ty + s * 40, 107, 100, color);
+    circle(Tx + s * 208, Ty + s * 34, 67, 60, color);
+    circle(Tx + s * 222, Ty + s * 31, 100, 100, color);
+    circle(Tx + s * 232, Ty + s * 25, 100, 100, color);
+    circle(Tx + s * 244, Ty + s * 16, 60, 60, color);
+    quad({{112, 18}, {246, 18}, {246, 11}, {111, 10}}, color, Tx, Ty, s);
+    quad({{120, 32}, {238, 32}, {238, 17}, {120, 17}}, color, Tx, Ty, s);
+    quad({{112, 18}, {246, 18}, {246, 11}, {111, 10}}, color, Tx, Ty, s);
+    quad({{120, 32}, {238, 32}, {238, 17}, {120, 17}}, color, Tx, Ty, s);
+
+}
 void display()
 {
     //sky
@@ -178,6 +223,12 @@ void display()
     glVertex2f(1920, 1080);
     glVertex2f(0, 1080);
     glEnd();
+
+
+    cloudLower(-250,480,10, {23, 13, 77});
+    cloudLower(-100,285,10, {46, 35, 93});
+    cloudLower(0,100,10, {115, 74, 218});
+
 
     // First Building
     First_Building(0, 0);
@@ -192,8 +243,6 @@ void display()
     First_Building(1500, 0);
     polygon({{1500, 245}, {1500, 250}, {1615,250}, {1615, 245}}, {0, 0, 0});
     First_Building(1500, 250);
-
-
 
 
     glFlush();
