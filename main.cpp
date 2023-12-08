@@ -17,6 +17,9 @@ struct Color
 };
 float cloudTime1 = 0;
 float cloudTime2 = 0;
+float planePosition = 3600;
+float carrierPosition = 00;
+float carrierTwoPosition = 400;
 
 Color interpolateColor(Color color1, Color color2, float t) {
     int r = static_cast<int>((1 - t) * color1.r + t * color2.r);
@@ -72,7 +75,7 @@ void polygon(vector<pair<float, float>> coord, Color color = {255, 255, 255}, fl
 
 void Sky(){
     glBegin(GL_QUADS);
-    glColor3ub(114, 77, 201);
+    glColor3ub(25, 19, 65);
     glVertex2f(0, 0);
     glVertex2f(1920, 0);
     glColor3ub(15, 3, 43);
@@ -81,8 +84,31 @@ void Sky(){
     glEnd();
 }
 
-void Clouds(float Tx, float Ty, float s, Color color)
-{
+
+void Stars(float x, float y, Color stars = {136, 139, 134}){
+    polygon({{x + 0, y + 0}, {x + 5, y + 0}, {x + 5, y + 5}, {x + 0, y + 5}}, stars);
+}
+
+void Star(){
+    float arr[45][2] = {
+        {150, 1000}, {250, 920}, {360, 970}, {400, 920}, {540, 950},
+        {560, 980}, {710, 1000}, {720, 1030}, {810, 930}, {810, 940},
+        {820, 950}, {850, 1040}, {880, 920}, {920, 1020}, {970, 910},
+        {1000, 920}, {1000, 950}, {1100, 1030}, {1170, 920}, {1200, 910},
+        {1200, 930}, {1200, 1040}, {1280, 1050}, {1290, 1040}, {1310, 910},
+        {1370, 980}, {1400, 940}, {1400, 940}, {1450, 1030}, {1460, 950},
+        {1490, 930}, {1500, 1050}, {1640, 970}, {1660, 970}, {1780, 960},
+        {1790, 960}, {1810, 950}, {1880, 970}, {1930, 1050}, {1960, 970},
+        {1970, 1010}, {1980, 940}, {1980, 950}, {1990, 970}
+    };
+
+    // Call the Stars function with the coordinates
+    for (int i = 0; i < 45; ++i) {
+        Stars(arr[i][0], arr[i][1]); // Pass individual coordinates to Stars function
+    }
+}
+
+void Clouds(float Tx, float Ty, float s, Color color){
     //first
     circle(Tx + s * 2, Ty + s * 30, 60, 60, color);
     circle(Tx + s * 13, Ty + s * 22, 93, 93, color);
@@ -122,27 +148,130 @@ void Clouds(float Tx, float Ty, float s, Color color)
     circle(Tx + s * 244, Ty + s * 16, 60, 60, color);
 
 }
-void updateAnimation(int value) {
+
+void updateCloud(int value) {
     cloudTime1 += 0.01;
     cloudTime2 -= 0.01;
     glutPostRedisplay();
-    glutTimerFunc(16, updateAnimation, 10);
+    glutTimerFunc(16, updateCloud, 10);
 }
 
 void cloud1() {
-    Clouds(0, 100 + 20 * sin(cloudTime1), 10, {115, 74, 218});
+    Clouds(0, 100 + 20 * sin(cloudTime1), 10, {114, 80, 203});
 }
 void cloud2(){
-    Clouds(-100, 285 + 20 * sin(cloudTime2), 10, {46, 35, 93});
+    Clouds(-100, 285 + 20 * sin(cloudTime2), 10, {53, 41, 107});
 }
 void cloud3(){
-    Clouds(-250, 480 + 20 * sin(cloudTime1), 10, {23, 13, 77});
+    Clouds(-250, 480 + 20 * sin(cloudTime1), 10, {36, 27, 82});
 }
 
 void drawClouds(){
     cloud3();
     cloud2();
     cloud1();
+}
+void plane(float x, float y, Color window = {112, 146, 243}, Color body = {0, 0, 0}){
+        polygon({{x + 0, y + 0}, {x + 100, y + 0}, {x + 100, y + 15}, {x + 0, y + 15}}, body);
+        polygon({{x - 15, y + 0}, {x + 0, y + 0}, {x + 0, y + 15}, {x - 15, y + 15}}, {191, 205, 252});
+        polygon({{x - 10, y + 15}, {x + 0, y + 15}, {x + 0, y + 20}, {x - 10, y + 20}}, {191, 205, 252});
+
+        // Windows
+        polygon({{x + 8, y + 5}, {x + 13, y + 5}, {x + 13, y + 10}, {x + 8, y + 10}}, window);
+        polygon({{x + 21, y + 5}, {x + 26, y + 5}, {x + 26, y + 10}, {x + 21, y + 10}}, window);
+        polygon({{x + 34, y + 5}, {x + 39, y + 5}, {x + 39, y + 10}, {x + 34, y + 10}}, window);
+        polygon({{x + 47, y + 5}, {x + 52, y + 5}, {x + 52, y + 10}, {x + 47, y + 10}}, window);
+        polygon({{x + 60, y + 5}, {x + 65, y + 5}, {x + 65, y + 10}, {x + 60, y + 10}}, window);
+        polygon({{x + 73, y + 5}, {x + 78, y + 5}, {x + 78, y + 10}, {x + 73, y + 10}}, window);
+
+        polygon({{x - 15, y + 0}, {x + 0, y + 0}, {x + 0, y + 5}, {x - 15, y + 5}}, body);
+        polygon({{x + 20, y + 15}, {x + 50, y + 15}, {x + 50, y + 20}, {x + 20, y + 20}}, body);
+        polygon({{x + 30, y + 20}, {x + 70, y + 20}, {x + 70, y + 25}, {x + 30, y + 25}}, body);
+        polygon({{x + 20, y + 0}, {x + 40, y + 0}, {x + 40, y - 5}, {x + 20, y - 5}}, body);
+        polygon({{x + 25, y - 5}, {x + 50, y - 5}, {x + 50, y - 10}, {x + 25, y - 10}}, body);
+        polygon({{x + 30, y - 10}, {x + 60, y - 10}, {x + 60, y - 15}, {x + 30, y - 15}}, body);
+
+        polygon({{x + 100, y + 3}, {x + 140, y + 3}, {x + 140, y + 7}, {x + 100, y + 7}}, {191, 205, 252});
+        polygon({{x + 100, y + 7}, {x + 160, y + 7}, {x + 160, y + 12}, {x + 100, y + 12}}, window);
+}
+
+void carrier(float x, float y, Color window = {227, 81, 144}, Color body = {0, 0, 0}){
+        polygon({{x + 0, y + 0}, {x + 100, y + 0}, {x + 100, y + 30}, {x + 0, y + 30}}, body);
+        polygon({{x + 85, y + 15}, {x + 100, y + 15}, {x + 100, y + 30}, {x + 85, y + 30}}, window);
+        polygon({{x + 50, y + 23}, {x + 80, y + 23}, {x + 80, y + 30}, {x + 50, y + 30}}, window);
+        polygon({{x + 10, y + 23}, {x + 40, y + 23}, {x + 40, y + 30}, {x + 10, y + 30}}, window);
+
+        // Window
+        polygon({{x + 10, y + 5}, {x + 20, y + 5}, {x + 20, y + 15}, {x + 10, y + 15}}, window);
+        polygon({{x + 30, y + 5}, {x + 40, y + 5}, {x + 40, y + 15}, {x + 30, y + 15}}, window);
+        polygon({{x + 50, y + 5}, {x + 60, y + 5}, {x + 60, y + 15}, {x + 50, y + 15}}, window);
+        polygon({{x + 70, y + 5}, {x + 80, y + 5}, {x + 80, y + 15}, {x + 70, y + 15}}, window);
+}
+
+void carrierTwo(float x, float y, Color window = {46, 190, 186}, Color body = {0, 0, 0}){
+        polygon({{x + 0, y + 0}, {x + 100, y + 0}, {x + 100, y + 30}, {x + 0, y + 30}}, body);
+        polygon({{x + 0, y + 15}, {x + 10, y + 15}, {x + 10, y + 25}, {x + 0, y + 25}}, window);
+        polygon({{x + 20, y + 20}, {x + 30, y + 20}, {x + 30, y + 25}, {x + 20, y + 25}}, window);
+        polygon({{x + 40, y + 20}, {x + 50, y + 20}, {x + 50, y + 25}, {x + 40, y + 25}}, window);
+        polygon({{x + 60, y + 20}, {x + 70, y + 20}, {x + 70, y + 25}, {x + 60, y + 25}}, window);
+        polygon({{x + 20, y + 10}, {x + 80, y + 10}, {x + 80, y + 15}, {x + 20, y + 15}}, {21, 107, 104});
+}
+
+void updatePlane(int value) {
+    if(planePosition > 0){
+        planePosition -= 50;
+    }
+    else{
+        planePosition = 40000;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(1, updatePlane, 0);
+}
+
+void updateCarrier(int value) {
+    if(carrierPosition < 3780){
+        carrierPosition += 20;
+    }
+    else{
+        carrierPosition = -8000;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(1, updateCarrier, 0);
+}
+
+void updateCarrierTwo(int value) {
+    if(carrierTwoPosition > 0){
+        carrierTwoPosition -= 10;
+    }
+    else{
+        carrierTwoPosition = 5000;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(1, updateCarrierTwo, 0);
+}
+
+void movePlane(){
+    glPushMatrix();
+    glScalef(0.5, 0.5,0.0);
+    plane(planePosition, 1500);
+    glPopMatrix();
+}
+
+void moveCarrer(){
+    glPushMatrix();
+    glScalef(0.5, 0.5,0.0);
+    carrier(carrierPosition, 1000);
+    glPopMatrix();
+}
+
+void moveCarrerTwo(){
+    glPushMatrix();
+    glScalef(0.5, 0.5,0.0);
+    carrierTwo(carrierTwoPosition, 550);
+    glPopMatrix();
 }
 
 void Building_One(float x, float y, int m = 1){
@@ -418,6 +547,56 @@ void Building_One_Terrace(float x, float y){
     polygon({{x + 75, y + 5}, {x + 130, y + 5}, {x + 130, y + 10}, {x + 75, y + 10}}, {90, 125, 149});
 
     NetworkTower(x + 20, y + 10);
+}
+
+void NetworkTowerThree(float x, float y, Color shadow = {19, 23, 69}, Color light = {244, 29, 27}){
+    polygon({{x + 25, y}, {x + 30, y}, {x + 30, y + 15}, {x + 25, y + 15}}, shadow);
+
+    polygon({{x + 35, y}, {x + 50, y}, {x + 50, y + 10}, {x + 35, y + 10}}, shadow);
+
+    polygon({{x + 50, y}, {x + 55, y}, {x + 55, y + 25}, {x + 50, y + 25}}, shadow);
+    polygon({{x + 49, y + 25}, {x + 56, y + 25}, {x + 56, y + 30}, {x + 49, y + 30}}, light);
+
+    polygon({{x + 65, y}, {x + 70, y}, {x + 70, y + 40}, {x + 65, y + 40}}, shadow);
+    polygon({{x + 64, y + 40}, {x + 71, y + 40}, {x + 71, y + 45}, {x + 64, y + 45}}, light);
+}
+
+void Building_Tower(float x, float y, Color shadow = {19, 23, 69}, Color light = {130, 86, 199}, Color red = {244, 29, 27}){
+    polygon({{x + -5, y}, {x + 70, y}, {x + 70, y + 15}, {x + -5, y + 15}}, light);
+    polygon({{x + 70, y}, {x + 145, y}, {x + 145, y + 15}, {x + 70, y + 15}}, shadow);
+
+    polygon({{x + -5, y + 15}, {x + 65, y + 15}, {x + 65, y + 30}, {x + -5, y + 30}}, light);
+    polygon({{x + 65, y + 15}, {x + 140, y + 15}, {x + 140, y + 30}, {x + 65, y + 30}}, shadow);
+
+    polygon({{x + -5, y + 30}, {x + 65, y + 30}, {x + 65, y + 45}, {x + -5, y + 45}}, light);
+    polygon({{x + 60, y + 30}, {x + 135, y + 30}, {x + 135, y + 45}, {x + 60, y + 45}}, shadow);
+
+    polygon({{x + -5, y + 45}, {x + 60, y + 45}, {x + 60, y + 60}, {x + -5, y + 60}}, light);
+    polygon({{x + 55, y + 45}, {x + 130, y + 45}, {x + 130, y + 60}, {x + 55, y + 60}}, shadow);
+
+    polygon({{x + -5, y + 60}, {x + 55, y + 60}, {x + 55, y + 75}, {x + -5, y + 75}}, light);
+    polygon({{x + 50, y + 60}, {x + 125, y + 60}, {x + 125, y + 75}, {x + 50, y + 75}}, shadow);
+
+    polygon({{x + 90, y + 15}, {x + 110, y + 15}, {x + 110, y + 90}, {x + 90, y + 90}}, {53, 41, 107});
+    polygon({{x + 85, y + 90}, {x + 110, y + 90}, {x + 100, y + 105}, {x + 75, y + 105}}, {40, 55, 76});
+    polygon({{x + 85, y + 15}, {x + 90, y + 15}, {x + 90, y + 95}, {x + 85, y + 95}}, light);
+    polygon({{x + 80, y + 30}, {x + 85, y + 30}, {x + 85, y + 105}, {x + 80, y + 105}}, light);
+    polygon({{x + 75, y + 45}, {x + 80, y + 45}, {x + 80, y + 110}, {x + 75, y + 110}}, light);
+
+    polygon({{x + 15, y + 75}, {x + 40, y + 75}, {x + 40, y + 125}, {x + 15, y + 125}}, light);
+    polygon({{x + 40, y + 75}, {x + 65, y + 75}, {x + 65, y + 110}, {x + 40, y + 110}}, shadow);
+
+    polygon({{x + 27, y + 120}, {x + 40, y + 120}, {x + 40, y + 125}, {x + 27, y + 125}}, shadow);
+    polygon({{x + 35, y + 125}, {x + 40, y + 125}, {x + 40, y + 135}, {x + 35, y + 135}}, shadow);
+    polygon({{x + 34, y + 135}, {x + 41, y + 135}, {x + 41, y + 140}, {x + 34, y + 140}}, red);
+
+    polygon({{x + 40, y + 90}, {x + 80, y + 90}, {x + 80, y + 110}, {x + 40, y + 110}}, light);
+    polygon({{x + 50, y + 105}, {x + 75, y + 105}, {x + 75, y + 110}, {x + 50, y + 110}}, shadow);
+    polygon({{x + 65, y + 80}, {x + 80, y + 80}, {x + 80, y + 90}, {x + 65, y + 90}}, light);
+    polygon({{x + 85, y + 95}, {x + 90, y + 95}, {x + 90, y + 100}, {x + 85, y + 100}}, shadow);
+
+    polygon({{x + 95, y + 95}, {x + 100, y + 95}, {x + 100, y + 120}, {x + 95, y + 120}}, shadow);
+    polygon({{x + 94, y + 120}, {x + 101, y + 120}, {x + 101, y + 125}, {x + 94, y + 125}}, red);
 }
 
 void Building_Two(float x, float y, int m = 1){
@@ -855,6 +1034,32 @@ void Fifth_Building(float x, float y, int m = 1, Color buildingWall = {130, 86, 
     polygon({{x + m * 5, y + 480}, {x + m * 65, y + 480}, {x + m * 65, y + 490}, {x + m * 5, y + 490}}, {67, 164, 97});
 }
 
+void SignBoard_Two(float x, float y, Color shadow = {19, 23, 69}){
+    // Pole's back shadow
+    polygon({{x + 20, y + 60}, {x + 100, y + 60}, {x + 100, y + 70}, {x + 20, y + 70}}, {35, 48, 98});
+
+    // Poles
+    polygon({{x + 10, y + 60}, {x + 20, y + 60}, {x + 20, y + 70}, {x + 10, y + 70}}, shadow);
+    polygon({{x + 40, y + 60}, {x + 50, y + 60}, {x + 50, y + 70}, {x + 40, y + 70}}, shadow);
+    polygon({{x + 70, y + 60}, {x + 80, y + 60}, {x + 80, y + 70}, {x + 70, y + 70}}, shadow);
+    polygon({{x + 100, y + 60}, {x + 110, y + 60}, {x + 110, y + 70}, {x + 100, y + 70}}, shadow);
+
+    // Board
+    polygon({{x + 0, y + 70}, {x + 120, y + 70}, {x + 120, y + 110}, {x + 0, y + 110}}, {63, 73, 249});
+
+    // Board Objects
+    polygon({{x + 15, y + 105}, {x + 20, y + 105}, {x + 20, y + 110}, {x + 15, y + 110}}, {125, 187, 255});
+    polygon({{x + 25, y + 105}, {x + 80, y + 105}, {x + 80, y + 110}, {x + 25, y + 110}}, {125, 187, 255});
+
+    polygon({{x + 20, y + 80}, {x + 55, y + 80}, {x + 55, y + 105}, {x + 20, y + 105}}, shadow);
+    polygon({{x + 55, y + 80}, {x + 75, y + 80}, {x + 75, y + 90}, {x + 55, y + 90}}, shadow);
+    polygon({{x + 75, y + 85}, {x + 95, y + 85}, {x + 95, y + 90}, {x + 75, y + 90}}, shadow);
+    polygon({{x + 80, y + 85}, {x + 95, y + 85}, {x + 95, y + 100}, {x + 80, y + 100}}, shadow);
+    polygon({{x + 90, y + 80}, {x + 100, y + 80}, {x + 100, y + 100}, {x + 90, y + 100}}, shadow);
+    polygon({{x + 20, y + 90}, {x + 35, y + 90}, {x + 35, y + 105}, {x + 20, y + 105}}, {239, 46, 65});
+
+}
+
 void Eight_Building(float x, float y, int m = 1, Color buildingWall = {24, 31, 61}, Color buildingWall2  = {42, 33, 186}, Color buildingWall3 = {35, 4, 46}, Color buildingWall4 = {27, 46, 75}){
     for (int i = 0; i < 200; ++i) {
         Color interpolatedColor = interpolateColor(buildingWall2, buildingWall, static_cast<float>(i) / 200.0f);
@@ -1015,7 +1220,7 @@ void Shadow_Building_Two(float x, float y, int m = 1, Color shadow = {19, 23, 69
 }
 
 void Shadow_Building_Three(float x, float y, Color shadow = {19, 23, 69}){
-    polygon({{x + 0, y + 0}, {x + 50, y + 0}, {x + 50, y + 60}, {x + 0, y + 60}}, shadow);
+    polygon({{x + 0, y + 0}, {x + 50, y + 0}, {x + 50, y + 130}, {x + 0, y + 130}}, shadow);
     polygon({{x + 10, y + 60}, {x + 50, y + 60}, {x + 50, y + 245}, {x + 10, y + 245}}, shadow);
 
     polygon({{x + 20, y + 245}, {x + 40, y + 245}, {x + 40, y + 250}, {x + 20, y + 250}}, shadow);
@@ -1037,6 +1242,44 @@ void Shadow_Building_Three(float x, float y, Color shadow = {19, 23, 69}){
     polygon({{x + 10, y + 300}, {x + 50, y + 300}, {x + 50, y + 310}, {x + 10, y + 310}}, shadow);
 }
 
+void setGLColorWithAlpha(const Color& color, int alpha) {
+    glColor4ub(color.r, color.g, color.b, alpha);
+}
+
+void Laser(float x, float y, Color shadow = {97, 252, 254}, int alpha = 100){
+
+    glPushMatrix();
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    setGLColorWithAlpha(shadow, alpha);
+    glBegin(GL_POLYGON);
+    glVertex2f(x + 0, y + 0);
+    glVertex2f(x + 5, y + 0);
+    glVertex2f(x + 5, y + 600);
+    glVertex2f(x + 0, y + 600);
+    glEnd();
+
+    // No transparency for this polygon
+    setGLColorWithAlpha({48, 122, 255}, alpha);
+    glBegin(GL_POLYGON);
+    glVertex2f(x + 5, y + 0);
+    glVertex2f(x + 45, y + 0);
+    glVertex2f(x + 45, y + 600);
+    glVertex2f(x + 5, y + 600);
+    glEnd();
+
+    setGLColorWithAlpha(shadow, alpha);
+    glBegin(GL_POLYGON);
+    glVertex2f(x + 45, y + 0);
+    glVertex2f(x + 50, y + 0);
+    glVertex2f(x + 50, y + 600);
+    glVertex2f(x + 45, y + 600);
+    glEnd();
+
+    glDisable(GL_BLEND);
+    glPopMatrix();
+}
 void Building(){
     // Building One
     Building_One(0, 0);
@@ -1054,12 +1297,14 @@ void Building(){
 
     // Building Three
     Third_Building(200, 0);
+    NetworkTowerThree(230, 505);
 
     // Building Four
     Tomb(320, 0);
 
     // Building Five
     Fifth_Building(420, 0);
+    SignBoard_Two(420, 435);
 
     // Building Five
     Building_Two(520, 0);
@@ -1081,12 +1326,13 @@ void Building(){
     NetworkTowerTwo(935, 475);
 
     // Shadow Building Four
-    polygon({{1080, 0}, {1080, 280}, {1200,280}, {1200, 0}}, {0, 0, 0});
+    polygon({{1080, 0}, {1080, 280}, {1200,280}, {1200, 0}}, {19, 23, 69});
 
     // Building Ten
     glPushMatrix();
     glScalef(1.2,1.4,0.0);
     Building_Two(950, 0);
+    Building_Tower(950, 220);
     glPopMatrix();
 
     // Building Nine
@@ -1094,6 +1340,8 @@ void Building(){
 
     // Building Twelve
     Building_One(1380, 0);
+    polygon({{1420, 250}, {1500, 250}, {1500, 260}, {1420, 260}}, {19, 23, 69});
+    polygon({{1400, 260}, {1500, 260}, {1500, 290}, {1400, 290}}, {19, 23, 69});
 
     // Building Eleven
     Building_Two(1280, 0);
@@ -1110,24 +1358,37 @@ void Building(){
 
     // Building Fifteen
     Third_Building(1720, 0);
+    NetworkTowerThree(1750, 505);
 
     // Fourteenth Building
     Building_Two(1600, 0);
     NetworkTowerTwo(1615, 220);
+    Laser(1775, 505);
 
     // Sixteenth Building
     Tomb(1850, 0);
 }
+
 void display()
 {
    //sky
     Sky();
+
+    // Stars
+    Star();
 
     // Clouds
     drawClouds();
 
     // Building
     Building();
+
+    // Plane
+    movePlane();
+
+    // Carrier
+    moveCarrer();
+    moveCarrerTwo();
 
     glFlush();
     glutSwapBuffers();
@@ -1151,6 +1412,9 @@ int main(int argc, char **argv)
     glutFullScreen();
     init();
     glutDisplayFunc(display);
-    glutTimerFunc(0, updateAnimation, 0);
+    glutTimerFunc(100, updateCloud, 0);
+    glutTimerFunc(100, updatePlane, 0);
+    glutTimerFunc(100, updateCarrier, 0);
+    glutTimerFunc(100, updateCarrierTwo, 0);
     glutMainLoop();
 }
