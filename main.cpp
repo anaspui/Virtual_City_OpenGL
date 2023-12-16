@@ -8,16 +8,10 @@
 using namespace std;
 
 /// Boolean Variables
-bool day, night = true, signBoard = false, laser = false;
+bool day = true, night = false, signBoard = false, laser = false, on = true;
 
-struct Color
-{
-    int r;
-    int g;
-    int b;
 
-    Color(int red, int green, int blue) : r(red), g(green), b(blue) {}
-};
+/// Float Variables for Translation
 float cloudTime1 = 0;
 float cloudTime2 = 0;
 float planePosition = 3600;
@@ -28,6 +22,18 @@ float DonutePosition = 0;
 float objectPositionX = 0;
 float objectPositionY = 0;
 
+
+/// Defining Color for Objects
+struct Color
+{
+    int r;
+    int g;
+    int b;
+
+    Color(int red, int green, int blue) : r(red), g(green), b(blue) {}
+};
+
+/// Generating Gradient Colors
 Color interpolateColor(Color color1, Color color2, float t) {
     int r = static_cast<int>((1 - t) * color1.r + t * color2.r);
     int g = static_cast<int>((1 - t) * color1.g + t * color2.g);
@@ -35,6 +41,7 @@ Color interpolateColor(Color color1, Color color2, float t) {
     return Color(r, g, b);
 }
 
+/// Shapes Structure
 void quad(float x1, float x2, float y1, float y2, Color color, float Tx = 0, float Ty = 0, float s = 1)
 {
     glColor3ub(color.r, color.g, color.b);
@@ -45,6 +52,7 @@ void quad(float x1, float x2, float y1, float y2, Color color, float Tx = 0, flo
     glVertex2f(s * x1 + Tx, s * y2 + Ty);
     glEnd();
 }
+
 void circle(float x, float y, float radius, float height, Color color)
 {
     int triangleAmount = 360;
@@ -55,6 +63,7 @@ void circle(float x, float y, float radius, float height, Color color)
         glVertex2f(x + (radius * cos(i * 2 * 3.1416 / triangleAmount)), y + (height * sin(i * 2 * 3.1416 / triangleAmount)));
     glEnd();
 }
+
 void quad(vector<pair<float, float>> coord, Color color = {255, 255, 255}, float Tx = 0, float Ty = 0, float s = 1)
 {
     glColor3ub(color.r, color.g, color.b);
@@ -80,22 +89,23 @@ void polygon(vector<pair<float, float>> coord, Color color = {255, 255, 255}, fl
     glEnd();
 }
 
+/// Sky Function
 void Sky(){
     Color skyColor = {25, 19, 65};
     if(night){
         skyColor = {25, 19, 65};
     } else if(day) {
-        skyColor = {0, 132, 201};
+        skyColor = {245, 204, 160};
     }
     polygon({{0, 0}, {1920, 0}, {1920, 1080}, {0, 1080}}, skyColor);
 }
 
-
-void Stars(float x, float y, Color stars = {136, 139, 134}){
+/// Star Function
+void Star(float x, float y, Color stars = {136, 139, 134}){
     polygon({{x + 0, y + 0}, {x + 5, y + 0}, {x + 5, y + 5}, {x + 0, y + 5}}, stars);
 }
 
-void Star(){
+void Stars(){
     float arr[45][2] = {
         {150, 1000}, {250, 920}, {360, 970}, {400, 920}, {540, 950},
         {560, 980}, {710, 1000}, {720, 1030}, {810, 930}, {810, 940},
@@ -108,14 +118,15 @@ void Star(){
         {1970, 1010}, {1980, 940}, {1980, 950}, {1990, 970}
     };
 
-    // Call the Stars function with the coordinates
+    /// Calls of Star function with coordinates
     for (int i = 0; i < 45; ++i) {
-        Stars(arr[i][0], arr[i][1]); // Pass individual coordinates to Stars function
+        Star(arr[i][0], arr[i][1]);
     }
 }
 
+/// Cloud Function
 void Clouds(float Tx, float Ty, float s, Color color){
-    //first
+    /// Left Portion
     circle(Tx + s * 2, Ty + s * 30, 60, 60, color);
     circle(Tx + s * 13, Ty + s * 22, 93, 93, color);
     circle(Tx + s * 24, Ty + s * 24, 83, 90, color);
@@ -132,11 +143,11 @@ void Clouds(float Tx, float Ty, float s, Color color){
     circle(Tx + s * 132, Ty + s * 25, 100, 100, color);
     circle(Tx + s * 144, Ty + s * 16, 60, 60, color);
 
-    // Quads for filling the empty portion
+    /// Quads for filling the empty portion
     quad({{0, -10}, {220, -10}, {220, 25}, {0, 25}}, color, Tx, Ty, s);
     quad({{25, 10}, {220, 10}, {220, 32}, {25, 32}}, color, Tx, Ty, s);
 
-    //last
+    /// Right Portion
     circle(Tx + s * 102, Ty + s * 30, 60, 60, color);
     circle(Tx + s * 113, Ty + s * 16, 93, 93, color);
     circle(Tx + s * 124, Ty + s * 24, 83, 90, color);
@@ -155,47 +166,7 @@ void Clouds(float Tx, float Ty, float s, Color color){
 
 }
 
-
-
-void Ghost(float x, float y, Color Body = {218, 78, 209}){
-    polygon({{x + 0, y + 0}, {x + 3, y + 0}, {x + 3, y + 15}, {x + 0, y + 15}}, Body);
-    polygon({{x + 3, y + 15}, {x + 6, y + 15}, {x + 6, y + 20}, {x + 3, y + 20}}, Body);
-    polygon({{x + 6, y + 20}, {x + 15, y + 20}, {x + 15, y + 23}, {x + 6, y + 23}}, Body);
-    polygon({{x + 15, y + 15}, {x + 18, y + 15}, {x + 18, y + 20}, {x + 15, y + 20}}, Body);
-    polygon({{x + 18, y + 0}, {x + 21, y + 0}, {x + 21, y + 15}, {x + 18, y + 15}}, Body);
-
-    // Eyes
-    polygon({{x + 6, y + 9}, {x + 9, y + 9}, {x + 9, y + 12}, {x + 6, y + 12}}, Body);
-    polygon({{x + 12, y + 9}, {x + 15, y + 9}, {x + 15, y + 12}, {x + 12, y + 12}}, Body);
-
-    // Legs
-    polygon({{x + 3, y + 0}, {x + 6, y + 0}, {x + 6, y + 3}, {x + 3, y + 3}}, Body);
-    polygon({{x + 6, y + 3}, {x + 9, y + 3}, {x + 9, y + 6}, {x + 6, y + 6}}, Body);
-    polygon({{x + 9, y + 0}, {x + 12, y + 0}, {x + 12, y + 3}, {x + 9, y + 3}}, Body);
-    polygon({{x + 12, y + 3}, {x + 15, y + 3}, {x + 15, y + 6}, {x + 12, y + 6}}, Body);
-    polygon({{x + 15, y + 0}, {x + 18, y + 0}, {x + 18, y + 3}, {x + 15, y + 3}}, Body);
-}
-
-
-
-void moveGhost(){
-    glPushMatrix();
-    if(night) if(signBoard) Ghost(-5 + 32, 510 + 60 + GhostPosition);
-    glPopMatrix();
-}
-
-void updateGhost(int value) {
-    if(GhostPosition < 2){
-        GhostPosition += 1;
-    }
-    else{
-        GhostPosition = 1;
-    }
-
-    glutPostRedisplay();
-    glutTimerFunc(200, updateGhost, 0);
-}
-
+/// Timer Function for updating Cloud Positions
 void updateCloud(int value) {
     cloudTime1 += 0.01;
     cloudTime2 -= 0.01;
@@ -208,34 +179,39 @@ void cloud1() {
     if(night){
         cloud = {114, 80, 203};
     } else if(day){
-        cloud = {255, 255, 255};
+        cloud = {228, 123, 50};
     }
     Clouds(0, 100 + 20 * sin(cloudTime1), 10, cloud);
 }
+
 void cloud2(){
     Color cloud = {53, 41, 107};
     if(night){
         cloud = {53, 41, 107};
     } else if(day){
-        cloud = {180, 194, 203};
+        cloud = {153, 77, 28};
     }
     Clouds(-100, 285 + 20 * sin(cloudTime2), 10, cloud);
 }
+
 void cloud3(){
     Color cloud = {36, 27, 82};
     if(night){
         cloud = {36, 27, 82};
     } else if(day){
-        cloud = {118, 127, 133};
+        cloud = {107, 36, 12};
     }
     Clouds(-250, 480 + 20 * sin(cloudTime1), 10, cloud);
 }
 
+/// Initializing all Clouds
 void drawClouds(){
     cloud3();
     cloud2();
     cloud1();
 }
+
+/// Plane Function
 void plane(float x, float y, Color window = {112, 146, 243}, Color body = {0, 0, 0}){
         polygon({{x + 0, y + 0}, {x + 100, y + 0}, {x + 100, y + 15}, {x + 0, y + 15}}, body);
         polygon({{x - 15, y + 0}, {x + 0, y + 0}, {x + 0, y + 15}, {x - 15, y + 15}}, {191, 205, 252});
@@ -260,6 +236,27 @@ void plane(float x, float y, Color window = {112, 146, 243}, Color body = {0, 0,
         polygon({{x + 100, y + 7}, {x + 160, y + 7}, {x + 160, y + 12}, {x + 100, y + 12}}, window);
 }
 
+/// Timer Function for updating Plane Positions
+void updatePlane(int value) {
+    if(planePosition > 0){
+        planePosition -= 50;
+    }
+    else{
+        planePosition = 40000;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(1, updatePlane, 0);
+}
+
+void movePlane(){
+    glPushMatrix();
+    glScalef(0.5, 0.5,0.0);
+    plane(planePosition, 1500);
+    glPopMatrix();
+}
+
+/// First Carrier Function
 void carrier(float x, float y, Color window = {227, 81, 144}, Color body = {0, 0, 0}){
         polygon({{x + 0, y + 0}, {x + 100, y + 0}, {x + 100, y + 30}, {x + 0, y + 30}}, body);
         polygon({{x + 85, y + 15}, {x + 100, y + 15}, {x + 100, y + 30}, {x + 85, y + 30}}, window);
@@ -273,27 +270,7 @@ void carrier(float x, float y, Color window = {227, 81, 144}, Color body = {0, 0
         polygon({{x + 70, y + 5}, {x + 80, y + 5}, {x + 80, y + 15}, {x + 70, y + 15}}, window);
 }
 
-void carrierTwo(float x, float y, Color window = {46, 190, 186}, Color body = {0, 0, 0}){
-        polygon({{x + 0, y + 0}, {x + 100, y + 0}, {x + 100, y + 30}, {x + 0, y + 30}}, body);
-        polygon({{x + 0, y + 15}, {x + 10, y + 15}, {x + 10, y + 25}, {x + 0, y + 25}}, window);
-        polygon({{x + 20, y + 20}, {x + 30, y + 20}, {x + 30, y + 25}, {x + 20, y + 25}}, window);
-        polygon({{x + 40, y + 20}, {x + 50, y + 20}, {x + 50, y + 25}, {x + 40, y + 25}}, window);
-        polygon({{x + 60, y + 20}, {x + 70, y + 20}, {x + 70, y + 25}, {x + 60, y + 25}}, window);
-        polygon({{x + 20, y + 10}, {x + 80, y + 10}, {x + 80, y + 15}, {x + 20, y + 15}}, {21, 107, 104});
-}
-
-void updatePlane(int value) {
-    if(planePosition > 0){
-        planePosition -= 50;
-    }
-    else{
-        planePosition = 40000;
-    }
-
-    glutPostRedisplay();
-    glutTimerFunc(1, updatePlane, 0);
-}
-
+/// Timer Function for updating First Carrier Positions
 void updateCarrier(int value) {
     if(carrierPosition < 3780){
         carrierPosition += 20;
@@ -306,6 +283,24 @@ void updateCarrier(int value) {
     glutTimerFunc(1, updateCarrier, 0);
 }
 
+void moveCarrer(){
+    glPushMatrix();
+    glScalef(0.5, 0.5,0.0);
+    carrier(carrierPosition, 1000);
+    glPopMatrix();
+}
+
+/// Second Carrier Function
+void carrierTwo(float x, float y, Color window = {46, 190, 186}, Color body = {0, 0, 0}){
+        polygon({{x + 0, y + 0}, {x + 100, y + 0}, {x + 100, y + 30}, {x + 0, y + 30}}, body);
+        polygon({{x + 0, y + 15}, {x + 10, y + 15}, {x + 10, y + 25}, {x + 0, y + 25}}, window);
+        polygon({{x + 20, y + 20}, {x + 30, y + 20}, {x + 30, y + 25}, {x + 20, y + 25}}, window);
+        polygon({{x + 40, y + 20}, {x + 50, y + 20}, {x + 50, y + 25}, {x + 40, y + 25}}, window);
+        polygon({{x + 60, y + 20}, {x + 70, y + 20}, {x + 70, y + 25}, {x + 60, y + 25}}, window);
+        polygon({{x + 20, y + 10}, {x + 80, y + 10}, {x + 80, y + 15}, {x + 20, y + 15}}, {21, 107, 104});
+}
+
+/// Timer Function for updating Second Carrier Positions
 void updateCarrierTwo(int value) {
     if(carrierTwoPosition > 0){
         carrierTwoPosition -= 10;
@@ -318,20 +313,6 @@ void updateCarrierTwo(int value) {
     glutTimerFunc(1, updateCarrierTwo, 0);
 }
 
-void movePlane(){
-    glPushMatrix();
-    glScalef(0.5, 0.5,0.0);
-    plane(planePosition, 1500);
-    glPopMatrix();
-}
-
-void moveCarrer(){
-    glPushMatrix();
-    glScalef(0.5, 0.5,0.0);
-    carrier(carrierPosition, 1000);
-    glPopMatrix();
-}
-
 void moveCarrerTwo(){
     glPushMatrix();
     glScalef(0.5, 0.5,0.0);
@@ -339,194 +320,340 @@ void moveCarrerTwo(){
     glPopMatrix();
 }
 
+/// Building One
+void Building_One(float x, float y, int m = 1, Color Pillar = {135, 82, 214}, Color PillarShadow = {33, 72, 136}, Color DarkPillar = {26, 46, 74}, Color DarkPillarShadow = {6, 23, 52}, Color windowDark = {28, 0, 149}, Color windowLightTop = {34, 203, 197}, Color windowLightBottom = {41, 94, 135}){
+    if(night){
+        windowDark = {28, 0, 149};
+        windowLightTop = {34, 203, 197};
+        windowLightBottom = {41, 94, 135};
+        Pillar = {135, 82, 214};
+        PillarShadow = {33, 72, 136};
+        DarkPillar = {26, 46, 74};
+        DarkPillarShadow = {6, 23, 52};
+    } else if(day){
+        windowDark = {227, 100, 20};
+        windowLightTop = {251, 139, 36};
+        windowLightBottom = {145, 15, 64};
+        Pillar = {245, 204, 160};
+        PillarShadow = {153, 77, 28};
+        DarkPillar = {228, 143, 69};
+        DarkPillarShadow = {107, 36, 12};
+    }
+    /// Bottom Portion
+    /// Left Portion
+    polygon({{x + 0, y + 0}, {x + 15, y + 0}, {x + 15, y + 245}, {x + 0, y + 245}}, PillarShadow);
 
-void Building_One(float x, float y, int m = 1){
-    // Bottom Portion
-    // Left Portion
-    polygon({{x + m * 0, y + 0}, {x + m * 15, y + 0}, {x + m * 15, y + 245}, {x + m * 0, y + 245}}, {33, 72, 136});
+    /// Pillar One
+    polygon({{x + 15, y + 0}, {x + 25, y + 0}, {x + 25, y + 245}, {x + 15, y + 245}}, Pillar);
+    polygon({{x + 25, y + 0}, {x + 40, y + 0}, {x + 40, y + 245}, {x + 25, y + 245}}, PillarShadow);
 
-    // Window Column One
-    polygon({{x + m * 5, y + 0}, {x + m * 15, y + 0}, {x + m * 15, y + 10}, {x + m * 5, y + 10}}, {41, 94, 135});
+    /// Pillar Two
+    polygon({{x + 40, y + 0}, {x + 50, y + 0}, {x + 50, y + 245}, {x + 40, y + 245}}, Pillar);
+    polygon({{x + 50, y + 0}, {x + 65, y + 0}, {x + 65, y + 245}, {x + 50, y + 245}}, PillarShadow);
 
-    polygon({{x + m * 5, y + 20}, {x + m * 15, y + 20}, {x + m * 15, y + 30}, {x + m * 5, y + 30}}, {34, 203, 197});
-    polygon({{x + m * 5, y + 30}, {x + m * 15, y + 30}, {x + m * 15, y + 40}, {x + m * 5, y + 40}}, {41, 94, 135});
+    /// Pillar Three
+    polygon({{x + 65, y + 0}, {x + 75, y + 0}, {x + 75, y + 245}, {x + 65, y + 245}}, Pillar);
 
-    polygon({{x + m * 5, y + 50}, {x + m * 15, y + 50}, {x + m * 15, y + 60}, {x + m * 5, y + 60}}, {34, 203, 197});
-    polygon({{x + m * 5, y + 60}, {x + m * 15, y + 60}, {x + m * 15, y + 70}, {x + m * 5, y + 70}}, {41, 94, 135});
+    /// Pillar Four
+    polygon({{x + 105, y + 0}, {x + 115, y + 0}, {x + 115, y + 245}, {x + 105, y + 245}}, DarkPillar);
+    polygon({{x + 115, y + 0}, {x + 135, y + 0}, {x + 135, y + 245}, {x + 115, y + 245}}, DarkPillarShadow);
 
-    polygon({{x + m * 5, y + 80}, {x + m * 15, y + 80}, {x + m * 15, y + 100}, {x + m * 5, y + 100}}, {28, 0, 149});
+    /// Right Portion
+    polygon({{x + 75, y + 0}, {x + 85, y + 0}, {x + 85, y + 245}, {x + 75, y + 245}}, DarkPillar);
 
-    polygon({{x + m * 5, y + 110}, {x + m * 15, y + 110}, {x + m * 15, y + 130}, {x + m * 5, y + 130}}, {28, 0, 149});
+    /// Pillar One
+    polygon({{x + 85, y + 0}, {x + 105, y + 0}, {x + 105, y + 245}, {x + 85, y + 245}}, DarkPillarShadow);
 
-    polygon({{x + m * 5, y + 140}, {x + m * 15, y + 140}, {x + m * 15, y + 160}, {x + m * 5, y + 160}}, {28, 0, 149});
+    /// Window Column One
+    polygon({{x + 5, y + 0}, {x + 15, y + 0}, {x + 15, y + 10}, {x + 5, y + 10}}, windowLightBottom);
 
-    polygon({{x + m * 5, y + 170}, {x + m * 15, y + 170}, {x + m * 15, y + 190}, {x + m * 5, y + 190}}, {28, 0, 149});
+    polygon({{x + 5, y + 20}, {x + 15, y + 20}, {x + 15, y + 30}, {x + 5, y + 30}}, windowLightTop);
+    polygon({{x + 5, y + 30}, {x + 15, y + 30}, {x + 15, y + 40}, {x + 5, y + 40}}, windowLightBottom);
 
-    polygon({{x + m * 5, y + 200}, {x + m * 15, y + 200}, {x + m * 15, y + 220}, {x + m * 5, y + 220}}, {28, 0, 149});
+    polygon({{x + 5, y + 50}, {x + 15, y + 50}, {x + 15, y + 60}, {x + 5, y + 60}}, windowLightTop);
+    polygon({{x + 5, y + 60}, {x + 15, y + 60}, {x + 15, y + 70}, {x + 5, y + 70}}, windowLightBottom);
 
-    polygon({{x + m * 5, y + 230}, {x + m * 15, y + 230}, {x + m * 15, y + 250}, {x + m * 5, y + 250}}, {28, 0, 149});
+    for (int i = 0; i< 6; i++){
+        int startY = 80 + i * 30;
+        polygon({{x + 5, y + startY}, {x + 15, y + startY}, {x + 15, y + (startY + 20)}, {x + 5, y + (startY + 20)}}, windowDark);
+    }
 
-    // Pillar One
-    polygon({{x + m * 15, y + 0}, {x + m * 25, y + 0}, {x + m * 25, y + 245}, {x + m * 15, y + 245}}, {135, 82, 214});
+    /// Window Column Two
+    polygon({{x + 30, y + 0}, {x + 40, y + 0}, {x + 40, y + 10}, {x + 30, y + 10}}, windowDark);
 
-    polygon({{x + m * 25, y + 0}, {x + m * 40, y + 0}, {x + m * 40, y + 245}, {x + m * 25, y + 245}}, {33, 72, 136});
+    polygon({{x + 30, y + 20}, {x + 40, y + 20}, {x + 40, y + 30}, {x + 30, y + 30}}, windowLightTop);
+    polygon({{x + 30, y + 30}, {x + 40, y + 30}, {x + 40, y + 40}, {x + 30, y + 40}}, windowLightBottom);
 
-    // Window Column Two
-    polygon({{x + m * 30, y + 0}, {x + m * 40, y + 0}, {x + m * 40, y + 10}, {x + m * 30, y + 10}}, {28, 0, 149});
+    polygon({{x + 30, y + 50}, {x + 40, y + 50}, {x + 40, y + 60}, {x + 30, y + 60}}, windowLightTop);
+    polygon({{x + 30, y + 60}, {x + 40, y + 60}, {x + 40, y + 70}, {x + 30, y + 70}}, windowLightBottom);
 
-    polygon({{x + m * 30, y + 20}, {x + m * 40, y + 20}, {x + m * 40, y + 30}, {x + m * 30, y + 30}}, {34, 203, 197});
-    polygon({{x + m * 30, y + 30}, {x + m * 40, y + 30}, {x + m * 40, y + 40}, {x + m * 30, y + 40}}, {41, 94, 135});
+    polygon({{x + 30, y + 80}, {x + 40, y + 80}, {x + 40, y + 90}, {x + 30, y + 90}}, windowLightTop);
+    polygon({{x + 30, y + 90}, {x + 40, y + 90}, {x + 40, y + 100}, {x + 30, y + 100}}, windowLightBottom);
 
-    polygon({{x + m * 30, y + 50}, {x + m * 40, y + 50}, {x + m * 40, y + 60}, {x + m * 30, y + 60}}, {34, 203, 197});
-    polygon({{x + m * 30, y + 60}, {x + m * 40, y + 60}, {x + m * 40, y + 70}, {x + m * 30, y + 70}}, {41, 94, 135});
+    polygon({{x + 30, y + 110}, {x + 40, y + 110}, {x + 40, y + 130}, {x + 30, y + 130}}, windowDark);
 
-    polygon({{x + m * 30, y + 80}, {x + m * 40, y + 80}, {x + m * 40, y + 100}, {x + m * 30, y + 100}}, {28, 0, 149});
+    polygon({{x + 30, y + 140}, {x + 40, y + 140}, {x + 40, y + 160}, {x + 30, y + 160}}, windowDark);
 
-    polygon({{x + m * 30, y + 110}, {x + m * 40, y + 110}, {x + m * 40, y + 130}, {x + m * 30, y + 130}}, {28, 0, 149});
+    polygon({{x + 30, y + 170}, {x + 40, y + 170}, {x + 40, y + 180}, {x + 30, y + 180}}, windowLightTop);
+    polygon({{x + 30, y + 180}, {x + 40, y + 180}, {x + 40, y + 190}, {x + 30, y + 190}}, windowLightBottom);
 
-    polygon({{x + m * 30, y + 140}, {x + m * 40, y + 140}, {x + m * 40, y + 160}, {x + m * 30, y + 160}}, {28, 0, 149});
+    polygon({{x + 30, y + 200}, {x + 40, y + 200}, {x + 40, y + 210}, {x + 30, y + 210}}, windowLightTop);
+    polygon({{x + 30, y + 210}, {x + 40, y + 210}, {x + 40, y + 220}, {x + 30, y + 220}}, windowLightBottom);
 
-    polygon({{x + m * 30, y + 170}, {x + m * 40, y + 170}, {x + m * 40, y + 180}, {x + m * 30, y + 180}}, {34, 203, 197});
-    polygon({{x + m * 30, y + 180}, {x + m * 40, y + 180}, {x + m * 40, y + 190}, {x + m * 30, y + 190}}, {41, 94, 135});
+    polygon({{x + 30, y + 230}, {x + 40, y + 230}, {x + 40, y + 240}, {x + 30, y + 240}}, windowLightTop);
+    polygon({{x + 30, y + 240}, {x + 40, y + 240}, {x + 40, y + 250}, {x + 30, y + 250}}, windowLightBottom);
 
-    polygon({{x + m * 30, y + 200}, {x + m * 40, y + 200}, {x + m * 40, y + 210}, {x + m * 30, y + 210}}, {34, 203, 197});
-    polygon({{x + m * 30, y + 210}, {x + m * 40, y + 210}, {x + m * 40, y + 220}, {x + m * 30, y + 220}}, {41, 94, 135});
+    /// Window Column Three
+    polygon({{x + 55, y + 0}, {x + 65, y + 0}, {x + 65, y + 10}, {x + 55, y + 10}}, windowDark);
 
-    //polygon({{x + m * 30, y + 200}, {x + m * 40, y + 200}, {x + m * 40, y + 220}, {x + m * 30, y + 220}}, {28, 0, 149});
+    polygon({{x + 55, y + 20}, {x + 65, y + 20}, {x + 65, y + 30}, {x + 55, y + 30}}, windowLightTop);
+    polygon({{x + 55, y + 30}, {x + 65, y + 30}, {x + 65, y + 40}, {x + 55, y + 40}}, windowLightBottom);
 
-    polygon({{x + m * 30, y + 230}, {x + m * 40, y + 230}, {x + m * 40, y + 240}, {x + m * 30, y + 240}}, {34, 203, 197});
-    polygon({{x + m * 30, y + 240}, {x + m * 40, y + 240}, {x + m * 40, y + 250}, {x + m * 30, y + 250}}, {41, 94, 135});
+    polygon({{x + 55, y + 50}, {x + 65, y + 50}, {x + 65, y + 70}, {x + 55, y + 70}}, windowDark);
 
-    //polygon({{x + m * 30, y + 230}, {x + m * 40, y + 230}, {x + m * 40, y + 250}, {x + m * 30, y + 250}}, {28, 0, 149});
+    polygon({{x + 55, y + 80}, {x + 65, y + 80}, {x + 65, y + 90}, {x + 55, y + 90}}, windowLightTop);
+    polygon({{x + 55, y + 90}, {x + 65, y + 90}, {x + 65, y + 100}, {x + 55, y + 100}}, windowLightBottom);
 
-    // Pillar Two
-    polygon({{x + m * 40, y + 0}, {x + m * 50, y + 0}, {x + m * 50, y + 245}, {x + m * 40, y + 245}}, {135, 82, 214});
+    polygon({{x + 55, y + 110}, {x + 65, y + 110}, {x + 65, y + 120}, {x + 55, y + 120}}, windowLightTop);
+    polygon({{x + 55, y + 120}, {x + 65, y + 120}, {x + 65, y + 130}, {x + 55, y + 130}}, windowLightBottom);
 
-    polygon({{x + m * 50, y + 0}, {x + m * 65, y + 0}, {x + m * 65, y + 245}, {x + m * 50, y + 245}}, {33, 72, 136});
+    polygon({{x + 55, y + 140}, {x + 65, y + 140}, {x + 65, y + 160}, {x + 55, y + 160}}, windowDark);
 
-    // Window Column Three
-    polygon({{x + m * 55, y + 0}, {x + m * 65, y + 0}, {x + m * 65, y + 10}, {x + m * 55, y + 10}}, {28, 0, 149});
+    polygon({{x + 55, y + 170}, {x + 65, y + 170}, {x + 65, y + 180}, {x + 55, y + 180}}, windowLightTop);
+    polygon({{x + 55, y + 180}, {x + 65, y + 180}, {x + 65, y + 190}, {x + 55, y + 190}}, windowLightBottom);
 
-    polygon({{x + m * 55, y + 20}, {x + m * 65, y + 20}, {x + m * 65, y + 30}, {x + m * 55, y + 30}}, {34, 203, 197});
-    polygon({{x + m * 55, y + 30}, {x + m * 65, y + 30}, {x + m * 65, y + 40}, {x + m * 55, y + 40}}, {41, 94, 135});
+    polygon({{x + 55, y + 200}, {x + 65, y + 200}, {x + 65, y + 220}, {x + 55, y + 220}}, windowDark);
 
-    polygon({{x + m * 55, y + 50}, {x + m * 65, y + 50}, {x + m * 65, y + 70}, {x + m * 55, y + 70}}, {28, 0, 149});
+    polygon({{x + 55, y + 230}, {x + 65, y + 230}, {x + 65, y + 240}, {x + 55, y + 240}}, windowLightTop);
+    polygon({{x + 55, y + 240}, {x + 65, y + 240}, {x + 65, y + 250}, {x + 55, y + 250}}, windowLightBottom);
 
-    //polygon({{x + m * 55, y + 50}, {x + m * 65, y + 50}, {x + m * 65, y + 60}, {x + m * 55, y + 60}}, {34, 203, 197});
-    //polygon({{x + m * 55, y + 60}, {x + m * 65, y + 60}, {x + m * 65, y + 70}, {x + m * 55, y + 70}}, {41, 94, 135});
+    /// Window Column Four
+    polygon({{x + 85, y + 0}, {x + 98, y + 0}, {x + 98, y + 10}, {x + 85, y + 10}}, windowDark);
 
-    polygon({{x + m * 55, y + 80}, {x + m * 65, y + 80}, {x + m * 65, y + 90}, {x + m * 55, y + 90}}, {34, 203, 197});
-    polygon({{x + m * 55, y + 90}, {x + m * 65, y + 90}, {x + m * 65, y + 100}, {x + m * 55, y + 100}}, {41, 94, 135});
+    polygon({{x + 85, y + 20}, {x + 98, y + 20}, {x + 98, y + 40}, {x + 85, y + 40}}, windowDark);
 
-    //polygon({{x + m * 55, y + 80}, {x + m * 65, y + 80}, {x + m * 65, y + 100}, {x + m * 55, y + 100}}, {28, 0, 149});
+    polygon({{x + 85, y + 50}, {x + 98, y + 50}, {x + 98, y + 70}, {x + 85, y + 70}}, windowDark);
 
-    polygon({{x + m * 55, y + 110}, {x + m * 65, y + 110}, {x + m * 65, y + 120}, {x + m * 55, y + 120}}, {34, 203, 197});
-    polygon({{x + m * 55, y + 120}, {x + m * 65, y + 120}, {x + m * 65, y + 130}, {x + m * 55, y + 130}}, {41, 94, 135});
+    polygon({{x + 85, y + 80}, {x + 98, y + 80}, {x + 98, y + 90}, {x + 85, y + 90}}, windowLightTop);
+    polygon({{x + 85, y + 90}, {x + 98, y + 90}, {x + 98, y + 100}, {x + 85, y + 100}}, windowLightBottom);
 
-    //polygon({{x + m * 55, y + 110}, {x + m * 65, y + 110}, {x + m * 65, y + 130}, {x + m * 55, y + 130}}, {28, 0, 149});
+    polygon({{x + 85, y + 110}, {x + 98, y + 110}, {x + 98, y + 130}, {x + 85, y + 130}}, windowDark);
 
-    polygon({{x + m * 55, y + 140}, {x + m * 65, y + 140}, {x + m * 65, y + 160}, {x + m * 55, y + 160}}, {28, 0, 149});
+    polygon({{x + 85, y + 140}, {x + 98, y + 140}, {x + 98, y + 160}, {x + 85, y + 160}}, windowDark);
 
-    polygon({{x + m * 55, y + 170}, {x + m * 65, y + 170}, {x + m * 65, y + 180}, {x + m * 55, y + 180}}, {34, 203, 197});
-    polygon({{x + m * 55, y + 180}, {x + m * 65, y + 180}, {x + m * 65, y + 190}, {x + m * 55, y + 190}}, {41, 94, 135});
+    polygon({{x + 85, y + 170}, {x + 98, y + 170}, {x + 98, y + 190}, {x + 85, y + 190}}, windowDark);
 
-    polygon({{x + m * 55, y + 200}, {x + m * 65, y + 200}, {x + m * 65, y + 220}, {x + m * 55, y + 220}}, {28, 0, 149});
+    polygon({{x + 85, y + 200}, {x + 98, y + 200}, {x + 98, y + 210}, {x + 85, y + 210}}, windowLightTop);
+    polygon({{x + 85, y + 210}, {x + 98, y + 210}, {x + 98, y + 220}, {x + 85, y + 220}}, windowLightBottom);
 
-    polygon({{x + m * 55, y + 230}, {x + m * 65, y + 230}, {x + m * 65, y + 240}, {x + m * 55, y + 240}}, {34, 203, 197});
-    polygon({{x + m * 55, y + 240}, {x + m * 65, y + 240}, {x + m * 65, y + 250}, {x + m * 55, y + 250}}, {41, 94, 135});
+    polygon({{x + 85, y + 230}, {x + 98, y + 230}, {x + 98, y + 245}, {x + 85, y + 245}}, windowDark);
 
-    //polygon({{x + m * 55, y + 230}, {x + m * 65, y + 230}, {x + m * 65, y + 250}, {x + m * 55, y + 250}}, {28, 0, 149});
 
-    // Pillar Three
-    polygon({{x + m * 65, y + 0}, {x + m * 75, y + 0}, {x + m * 75, y + 245}, {x + m * 65, y + 245}}, {135, 82, 214});
+   /// Window Column Five
+    polygon({{x + 115, y + 0}, {x + 130, y + 0}, {x + 130, y + 10}, {x + 115, y + 10}}, windowDark);
 
-    // Terrace
-    polygon({{x + m * 0, y + 245}, {x + m * 75, y + 245}, {x + m * 75, y + 250}, {x + m * 0, y + 250}}, {135, 82, 214});
-    polygon({{x + m * 75, y + 245}, {x + m * 145, y + 245}, {x + m * 145, y + 250}, {x + m * 75, y + 250}}, {26, 46, 74});
+    polygon({{x + 115, y + 20}, {x + 130, y + 20}, {x + 130, y + 40}, {x + 115, y + 40}}, windowDark);
 
-    // Right Portion
-    polygon({{x + m * 75, y + 0}, {x + m * 85, y + 0}, {x + m * 85, y + 245}, {x + m * 75, y + 245}}, {26, 46, 74});
+    polygon({{x + 115, y + 50}, {x + 130, y + 50}, {x + 130, y + 60}, {x + 115, y + 60}}, windowLightTop);
+    polygon({{x + 115, y + 60}, {x + 130, y + 60}, {x + 130, y + 70}, {x + 115, y + 70}}, windowLightBottom);
 
-    // Section One
-    polygon({{x + m * 85, y + 0}, {x + m * 105, y + 0}, {x + m * 105, y + 245}, {x + m * 85, y + 245}}, {6, 23, 52});
+    polygon({{x + 115, y + 80}, {x + 130, y + 80}, {x + 130, y + 90}, {x + 115, y + 90}}, windowLightTop);
+    polygon({{x + 115, y + 90}, {x + 130, y + 90}, {x + 130, y + 100}, {x + 115, y + 100}}, windowLightBottom);
 
-    // Window Column Four
-    polygon({{x + m * 85, y + 0}, {x + m * 98, y + 0}, {x + m * 98, y + 10}, {x + m * 85, y + 10}}, {28, 0, 149});
+    polygon({{x + 115, y + 110}, {x + 130, y + 110}, {x + 130, y + 120}, {x + 115, y + 120}}, windowLightTop);
+    polygon({{x + 115, y + 120}, {x + 130, y + 120}, {x + 130, y + 130}, {x + 115, y + 130}}, windowLightBottom);
 
-    polygon({{x + m * 85, y + 20}, {x + m * 98, y + 20}, {x + m * 98, y + 40}, {x + m * 85, y + 40}}, {28, 0, 149});
+    polygon({{x + 115, y + 140}, {x + 130, y + 140}, {x + 130, y + 160}, {x + 115, y + 160}}, windowDark);
 
-    //polygon({{x + m * 85, y + 20}, {x + m * 98, y + 20}, {x + m * 98, y + 30}, {x + m * 85, y + 30}}, {34, 203, 197});
-    //polygon({{x + m * 85, y + 30}, {x + m * 98, y + 30}, {x + m * 98, y + 40}, {x + m * 85, y + 40}}, {41, 94, 135});
+    polygon({{x + 115, y + 170}, {x + 130, y + 170}, {x + 130, y + 180}, {x + 115, y + 180}}, windowLightTop);
+    polygon({{x + 115, y + 180}, {x + 130, y + 180}, {x + 130, y + 190}, {x + 115, y + 190}}, windowLightBottom);
 
-    polygon({{x + m * 85, y + 50}, {x + m * 98, y + 50}, {x + m * 98, y + 70}, {x + m * 85, y + 70}}, {28, 0, 149});
+    polygon({{x + 115, y + 200}, {x + 130, y + 200}, {x + 130, y + 220}, {x + 115, y + 220}}, windowDark);
 
-    //polygon({{x + m * 85, y + 50}, {x + m * 98, y + 50}, {x + m * 98, y + 60}, {x + m * 85, y + 60}}, {34, 203, 197});
-    //polygon({{x + m * 85, y + 60}, {x + m * 98, y + 60}, {x + m * 98, y + 70}, {x + m * 85, y + 70}}, {41, 94, 135});
+    polygon({{x + 115, y + 230}, {x + 130, y + 230}, {x + 130, y + 237}, {x + 115, y + 237}}, windowLightTop);
+    polygon({{x + 115, y + 237}, {x + 130, y + 237}, {x + 130, y + 245}, {x + 115, y + 245}}, windowLightBottom);
 
-    polygon({{x + m * 85, y + 80}, {x + m * 98, y + 80}, {x + m * 98, y + 90}, {x + m * 85, y + 90}}, {34, 203, 197});
-    polygon({{x + m * 85, y + 90}, {x + m * 98, y + 90}, {x + m * 98, y + 100}, {x + m * 85, y + 100}}, {41, 94, 135});
+    polygon({{x + 135, y + 0}, {x + 145, y + 0}, {x + 145, y + 245}, {x + 135, y + 245}}, DarkPillar);
 
-    //polygon({{x + m * 85, y + 80}, {x + m * 98, y + 80}, {x + m * 98, y + 100}, {x + m * 85, y + 100}}, {28, 0, 149});
+    /// Terrace
+    polygon({{x + 0, y + 245}, {x + 75, y + 245}, {x + 75, y + 250}, {x + 0, y + 250}}, Pillar);
+    polygon({{x + 75, y + 245}, {x + 145, y + 245}, {x + 145, y + 250}, {x + 75, y + 250}}, DarkPillar);
 
-    polygon({{x + m * 85, y + 110}, {x + m * 98, y + 110}, {x + m * 98, y + 130}, {x + m * 85, y + 130}}, {28, 0, 149});
-
-    polygon({{x + m * 85, y + 140}, {x + m * 98, y + 140}, {x + m * 98, y + 160}, {x + m * 85, y + 160}}, {28, 0, 149});
-
-    polygon({{x + m * 85, y + 170}, {x + m * 98, y + 170}, {x + m * 98, y + 190}, {x + m * 85, y + 190}}, {28, 0, 149});
-
-    //polygon({{x + m * 85, y + 170}, {x + m * 98, y + 170}, {x + m * 98, y + 180}, {x + m * 85, y + 180}}, {34, 203, 197});
-    //polygon({{x + m * 85, y + 180}, {x + m * 98, y + 180}, {x + m * 98, y + 190}, {x + m * 85, y + 190}}, {41, 94, 135});
-
-    polygon({{x + m * 85, y + 200}, {x + m * 98, y + 200}, {x + m * 98, y + 210}, {x + m * 85, y + 210}}, {34, 203, 197});
-    polygon({{x + m * 85, y + 210}, {x + m * 98, y + 210}, {x + m * 98, y + 220}, {x + m * 85, y + 220}}, {41, 94, 135});
-
-    //polygon({{x + m * 85, y + 200}, {x + m * 98, y + 200}, {x + m * 98, y + 220}, {x + m * 85, y + 220}}, {28, 0, 149});
-
-    polygon({{x + m * 85, y + 230}, {x + m * 98, y + 230}, {x + m * 98, y + 245}, {x + m * 85, y + 245}}, {28, 0, 149});
-
-    // Pillar
-    polygon({{x + m * 105, y + 0}, {x + m * 115, y + 0}, {x + m * 115, y + 245}, {x + m * 105, y + 245}}, {26, 46, 74});
-
-
-    polygon({{x + m * 115, y + 0}, {x + m * 135, y + 0}, {x + m * 135, y + 245}, {x + m * 115, y + 245}}, {6, 23, 52});
-
-    // Window Column Five
-    polygon({{x + m * 115, y + 0}, {x + m * 130, y + 0}, {x + m * 130, y + 10}, {x + m * 115, y + 10}}, {28, 0, 149});
-
-    polygon({{x + m * 115, y + 20}, {x + m * 130, y + 20}, {x + m * 130, y + 40}, {x + m * 115, y + 40}}, {28, 0, 149});
-
-    //polygon({{x + m * 115, y + 20}, {x + m * 130, y + 20}, {x + m * 130, y + 30}, {x + m * 115, y + 30}}, {34, 203, 197});
-    //polygon({{x + m * 115, y + 30}, {x + m * 130, y + 30}, {x + m * 130, y + 40}, {x + m * 115, y + 40}}, {41, 94, 135});
-
-    polygon({{x + m * 115, y + 50}, {x + m * 130, y + 50}, {x + m * 130, y + 60}, {x + m * 115, y + 60}}, {34, 203, 197});
-    polygon({{x + m * 115, y + 60}, {x + m * 130, y + 60}, {x + m * 130, y + 70}, {x + m * 115, y + 70}}, {41, 94, 135});
-
-    polygon({{x + m * 115, y + 80}, {x + m * 130, y + 80}, {x + m * 130, y + 90}, {x + m * 115, y + 90}}, {34, 203, 197});
-    polygon({{x + m * 115, y + 90}, {x + m * 130, y + 90}, {x + m * 130, y + 100}, {x + m * 115, y + 100}}, {41, 94, 135});
-
-    //polygon({{x + m * 115, y + 80}, {x + m * 130, y + 80}, {x + m * 130, y + 100}, {x + m * 115, y + 100}}, {28, 0, 149});
-
-    polygon({{x + m * 115, y + 110}, {x + m * 130, y + 110}, {x + m * 130, y + 120}, {x + m * 115, y + 120}}, {34, 203, 197});
-    polygon({{x + m * 115, y + 120}, {x + m * 130, y + 120}, {x + m * 130, y + 130}, {x + m * 115, y + 130}}, {41, 94, 135});
-
-    //polygon({{x + m * 115, y + 110}, {x + m * 130, y + 110}, {x + m * 130, y + 130}, {x + m * 115, y + 130}}, {28, 0, 149});
-
-    polygon({{x + m * 115, y + 140}, {x + m * 130, y + 140}, {x + m * 130, y + 160}, {x + m * 115, y + 160}}, {28, 0, 149});
-
-    polygon({{x + m * 115, y + 170}, {x + m * 130, y + 170}, {x + m * 130, y + 180}, {x + m * 115, y + 180}}, {34, 203, 197});
-    polygon({{x + m * 115, y + 180}, {x + m * 130, y + 180}, {x + m * 130, y + 190}, {x + m * 115, y + 190}}, {41, 94, 135});
-
-    polygon({{x + m * 115, y + 200}, {x + m * 130, y + 200}, {x + m * 130, y + 220}, {x + m * 115, y + 220}}, {28, 0, 149});
-
-    polygon({{x + m * 115, y + 230}, {x + m * 130, y + 230}, {x + m * 130, y + 237}, {x + m * 115, y + 237}}, {34, 203, 197});
-    polygon({{x + m * 115, y + 237}, {x + m * 130, y + 237}, {x + m * 130, y + 245}, {x + m * 115, y + 245}}, {41, 94, 135});
-
-    polygon({{x + m * 135, y + 0}, {x + m * 145, y + 0}, {x + m * 145, y + 245}, {x + m * 135, y + 245}}, {26, 46, 74});
 
 }
 
+/// Timer Function for making the First Building's Window Color Toggle
+int i, j, k= 0;
+bool two, three = true;
+void updateLights(int value) {
 
+    if(on && i < 10){
+        on = false;
+        i += 0.5;
+    }
+    else{
+        on = true;
+        i = 0;
+    }
 
+    glutPostRedisplay();
+    glutTimerFunc(2000, updateLights, 0);
+}
+
+void updateLights2(int value) {
+
+    if(on && j < 1){
+        two = false;
+        j += 1;
+    }
+    else{
+        two = true;
+        j = 0;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(500, updateLights2, 0);
+}
+
+void updateLights3(int value) {
+
+    if(on && k < 1){
+        three = false;
+        k += 1;
+    }
+    else{
+        three = true;
+        k = 0;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(1000, updateLights3, 0);
+}
+
+void LightOnOff(){
+    if(night){
+        if(on) {
+            polygon({{30, 80}, {40, 80}, {40, 100}, {30, 100}}, {28, 0, 149});
+            polygon({{85, 255 + 200}, {98, 255 + 200}, {98, 255 + 220}, {85, 255 + 220}}, {28, 0, 149});
+            polygon({{420 + 5, 340}, {420 + 65, 340}, {420 + 65, 360}, {420 +  5, 360}}, {43, 71, 136});
+            polygon({{420 + 5, 360}, {420 + 65, 360}, {420 + 65, 370}, {420 + 5, 370}}, {61, 56, 130});
+            polygon({{930 + 100, 255 + 185}, {930 + 110, 255 + 185}, {930 + 110, 255 + 200}, {930 + 100, 255 + 200}}, {34, 203, 197});
+            polygon({{930 + 120, 255 + 185}, {930 + 130, 255 + 185}, {930 + 130, 255 + 200}, {930 + 120, 255 + 200}}, {34, 203, 197});
+            polygon({{930 + 120, 255 + 155}, {930 + 130, 255 + 155}, {930 + 130, 255 + 170}, {930 + 120, 255 + 170}}, {34, 203, 197});
+        }
+        if(two){
+            polygon({{30, 255 + 80}, {40, 255 + 80}, {40, 255 + 100}, {30, 255 + 100}}, {28, 0, 149});
+            polygon({{320 + 10, 40}, {320 + 15, 40}, {320 + 15, 46}, {320 + 10, 46}}, {34, 203, 197});
+            polygon({{320 + 25, 40}, {320 + 30, 40}, {320 + 30, 46}, {320 + 25, 46}}, {34, 203, 197});
+            polygon({{320 + 50, 40}, {320 + 55, 40}, {320 + 55, 46}, {320 + 50, 46}}, {34, 203, 197});
+            polygon({{1720 + 87, 290}, {1720 + 98, 290}, {1720 + 98, 310}, {1720 + 87, 310}}, {28, 0, 149});
+        }
+        if(three){
+            polygon({{1850 + 10, 40}, {1850 + 15, 40}, {1850 + 15, 46}, {1850 + 10, 46}}, {34, 203, 197});
+            polygon({{1850 + 25, 40}, {1850 + 30, 40}, {1850 + 30, 46}, {1850 + 25, 46}}, {34, 203, 197});
+            polygon({{520 + 10, 70}, {520 + 20, 70}, {520 + 20, 85}, {520 + 10, 85}}, {34, 203, 197});
+            polygon({{520 + 10, 40}, {520 + 20, 40}, {520 + 20, 55}, {520 + 10, 55}}, {34, 203, 197});
+            polygon({{1720 + 117, 320}, {1720 + 127, 320}, {1720 + 127, 340}, {1720 + 117, 340}}, {28, 0, 149});
+        }
+    }
+}
+
+/// Signboard's Ghost
+void Ghost(float x, float y, Color Body = {218, 78, 209}){
+    polygon({{x + 0, y + 0}, {x + 3, y + 0}, {x + 3, y + 15}, {x + 0, y + 15}}, Body);
+    polygon({{x + 3, y + 15}, {x + 6, y + 15}, {x + 6, y + 20}, {x + 3, y + 20}}, Body);
+    polygon({{x + 6, y + 20}, {x + 15, y + 20}, {x + 15, y + 23}, {x + 6, y + 23}}, Body);
+    polygon({{x + 15, y + 15}, {x + 18, y + 15}, {x + 18, y + 20}, {x + 15, y + 20}}, Body);
+    polygon({{x + 18, y + 0}, {x + 21, y + 0}, {x + 21, y + 15}, {x + 18, y + 15}}, Body);
+
+    // Eyes
+    polygon({{x + 6, y + 9}, {x + 9, y + 9}, {x + 9, y + 12}, {x + 6, y + 12}}, Body);
+    polygon({{x + 12, y + 9}, {x + 15, y + 9}, {x + 15, y + 12}, {x + 12, y + 12}}, Body);
+
+    // Legs
+    polygon({{x + 3, y + 0}, {x + 6, y + 0}, {x + 6, y + 3}, {x + 3, y + 3}}, Body);
+    polygon({{x + 6, y + 3}, {x + 9, y + 3}, {x + 9, y + 6}, {x + 6, y + 6}}, Body);
+    polygon({{x + 9, y + 0}, {x + 12, y + 0}, {x + 12, y + 3}, {x + 9, y + 3}}, Body);
+    polygon({{x + 12, y + 3}, {x + 15, y + 3}, {x + 15, y + 6}, {x + 12, y + 6}}, Body);
+    polygon({{x + 15, y + 0}, {x + 18, y + 0}, {x + 18, y + 3}, {x + 15, y + 3}}, Body);
+}
+
+/// Timer Function for making the Ghost Translate on Y-axis
+void moveGhost(){
+    glPushMatrix();
+    if(night) if(signBoard) Ghost(-5 + 32, 510 + 60 + GhostPosition);
+    glPopMatrix();
+}
+
+void updateGhost(int value) {
+    if(GhostPosition < 2){
+        GhostPosition += 1;
+    }
+    else{
+        GhostPosition = 1;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(200, updateGhost, 0);
+}
+
+/// Signboard's Donute
+void SignBoard_Donute(float x, float y, Color Donute = {218, 78, 209}){
+    polygon({{x + 2, y + 0}, {x + 7, y + 0}, {x + 7, y + 2}, {x + 2, y + 2}}, Donute);
+    polygon({{x + 0, y + 2}, {x + 2, y + 2}, {x + 2, y + 9}, {x + 0, y + 9}}, Donute);
+    polygon({{x + 7, y + 2}, {x + 9, y + 2}, {x + 7, y + 9}, {x + 9, y + 9}}, Donute);
+    polygon({{x + 2, y + 9}, {x + 7, y + 9}, {x + 7, y + 11}, {x + 2, y + 11}}, Donute);
+}
+
+/// Timer Function for making the Donutes Translate on Y-axis
+void updateDonute(int value) {
+    if(DonutePosition > -10){
+        DonutePosition -= 2;
+    }
+    else{
+        DonutePosition = 0;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(50, updateDonute, 0);
+}
+
+/// Building One's Signboard
+void Building_One_SignBoard(float x, float y, Color shadow = {19, 23, 69}, Color light = {244, 29, 27}){
+    /// Polls
+    polygon({{x + 5, y + 0}, {x + 10, y + 0}, {x + 10, y + 35}, {x + 5, y + 35}}, shadow);
+    polygon({{x + 85, y + 0}, {x + 90, y + 0}, {x + 90, y + 35}, {x + 85, y + 35}}, shadow);
+
+    /// Layer One
+    if(night) if(signBoard) polygon({{x - 10, y + 35}, {x + 105, y + 35}, {x + 105, y + 90}, {x - 10, y + 90}}, {77, 104, 159});
+
+    /// Layer Two
+    polygon({{x - 5, y + 40}, {x + 100, y + 40}, {x + 100, y + 85}, {x - 5, y + 85}}, {103, 152, 191});
+
+    /// Layer Three
+    if(night) if(signBoard) polygon({{x - 2, y + 43}, {x + 97, y + 43}, {x + 97, y + 82}, {x - 2, y + 82}}, {79, 211, 217});
+
+    /// Layer Four
+    polygon({{x, y + 45}, {x + 95, y + 45}, {x + 95, y + 80}, {x, y + 80}}, {103, 152, 191});
+
+    /// Layer Five
+    polygon({{x + 2, y + 47}, {x + 93, y + 47}, {x + 93, y + 78}, {x + 2, y + 78}}, {19, 23, 69});
+}
+
+/// Initializing Signboard
+void SignBoard(float x, float y){
+    Building_One_SignBoard(x + 25, y + 10);
+    if(signBoard){
+        if(night){
+            SignBoard_Donute(x + 60 + DonutePosition, y + 65, {218, 78, 209});
+            SignBoard_Donute(x + 75 + DonutePosition, y + 67, {250, 254, 124});
+            SignBoard_Donute(x + 90 + DonutePosition, y + 65, {218, 78, 209});
+            SignBoard_Donute(x + 105 + DonutePosition, y + 67, {250, 254, 124});
+        }
+    }
+}
+
+/// Building One Network Tower
 void NetworkTower(float x, float y, Color shadow = {19, 23, 69}, Color light = {244, 29, 27}){
 
     polygon({{x + 25, y}, {x + 30, y}, {x + 30, y + 15}, {x + 25, y + 15}}, shadow);
@@ -539,49 +666,16 @@ void NetworkTower(float x, float y, Color shadow = {19, 23, 69}, Color light = {
     polygon({{x + 65, y}, {x + 70, y}, {x + 70, y + 10}, {x + 65, y + 10}}, shadow);
 }
 
-void NetworkTowerTwo(float x, float y, Color shadow = {19, 23, 69}, Color light = {244, 29, 27}){
+/// Building One's Terrace
+void Building_One_Terrace(float x, float y){
+    polygon({{x + 20, y}, {x + 75, y}, {x + 75, y + 5}, {x + 20, y + 5}}, {122, 165, 198});
+    polygon({{x + 20, y + 5}, {x + 75, y + 5}, {x + 75, y + 10}, {x + 20, y + 10}}, {155, 204, 239});
 
-    polygon({{x + 25, y}, {x + 100, y}, {x + 100, y + 10}, {x + 25, y + 10}}, shadow);
-    polygon({{x + 45, y}, {x + 80, y}, {x + 80, y + 25}, {x + 45, y + 25}}, shadow);
-    polygon({{x + 95, y}, {x + 100, y}, {x + 100, y + 25}, {x + 95, y + 25}}, shadow);
-    polygon({{x + 75, y}, {x + 80, y}, {x + 80, y + 40}, {x + 75, y + 40}}, shadow);
+    polygon({{x + 75, y}, {x + 130, y}, {x + 130, y + 5}, {x + 75, y + 5}}, {78, 105, 131});
+    polygon({{x + 75, y + 5}, {x + 130, y + 5}, {x + 130, y + 10}, {x + 75, y + 10}}, {90, 125, 149});
 
-    if(night) polygon({{x + 74, y + 40}, {x + 81, y + 40}, {x + 81, y + 47}, {x + 74, y + 47}}, light);
-
+    NetworkTower(x + 20, y + 10);
 }
-
-void SignBoard_Donute(float x, float y, Color Donute = {218, 78, 209}){
-    polygon({{x + 2, y + 0}, {x + 7, y + 0}, {x + 7, y + 2}, {x + 2, y + 2}}, Donute);
-    polygon({{x + 0, y + 2}, {x + 2, y + 2}, {x + 2, y + 9}, {x + 0, y + 9}}, Donute);
-    polygon({{x + 7, y + 2}, {x + 9, y + 2}, {x + 7, y + 9}, {x + 9, y + 9}}, Donute);
-    polygon({{x + 2, y + 9}, {x + 7, y + 9}, {x + 7, y + 11}, {x + 2, y + 11}}, Donute);
-}
-
-
-void Building_One_SignBoard(float x, float y, Color shadow = {19, 23, 69}, Color light = {244, 29, 27}){
-
-    // Polls
-    polygon({{x + 5, y + 0}, {x + 10, y + 0}, {x + 10, y + 35}, {x + 5, y + 35}}, shadow);
-    polygon({{x + 85, y + 0}, {x + 90, y + 0}, {x + 90, y + 35}, {x + 85, y + 35}}, shadow);
-
-
-    // Board Layer One
-    if(night) if(signBoard) polygon({{x - 10, y + 35}, {x + 105, y + 35}, {x + 105, y + 90}, {x - 10, y + 90}}, {77, 104, 159});
-
-    // Board Layer Two
-    polygon({{x - 5, y + 40}, {x + 100, y + 40}, {x + 100, y + 85}, {x - 5, y + 85}}, {103, 152, 191});
-
-    // Board Layer Three
-    if(night) if(signBoard) polygon({{x - 2, y + 43}, {x + 97, y + 43}, {x + 97, y + 82}, {x - 2, y + 82}}, {79, 211, 217});
-
-    // Board Layer Four
-    polygon({{x, y + 45}, {x + 95, y + 45}, {x + 95, y + 80}, {x, y + 80}}, {103, 152, 191});
-
-    // Board Layer Five
-    polygon({{x + 2, y + 47}, {x + 93, y + 47}, {x + 93, y + 78}, {x + 2, y + 78}}, {19, 23, 69});
-}
-
-
 
 void LaserObjects(float x, float y, Color body = {97, 252, 254}){
     polygon({{x + 20, y + 10 + objectPositionY}, {x + 25, y + 10 + objectPositionY}, {x + 25, y + 15 + objectPositionY}, {x + 20, y + 15 + objectPositionY}}, body);
@@ -609,40 +703,6 @@ void updateLaserObjects(int value) {
     glutTimerFunc(50, updateLaserObjects, 0);
 }
 
-void SignBoard(float x, float y){
-    Building_One_SignBoard(x + 25, y + 10);
-    if(signBoard){
-        if(night){
-            SignBoard_Donute(x + 60 + DonutePosition, y + 65, {218, 78, 209});
-            SignBoard_Donute(x + 75 + DonutePosition, y + 67, {250, 254, 124});
-            SignBoard_Donute(x + 90 + DonutePosition, y + 65, {218, 78, 209});
-            SignBoard_Donute(x + 105 + DonutePosition, y + 67, {250, 254, 124});
-        }
-    }
-}
-
-void updateDonute(int value) {
-    if(DonutePosition > -10){
-        DonutePosition -= 2;
-    }
-    else{
-        DonutePosition = 0;
-    }
-
-    glutPostRedisplay();
-    glutTimerFunc(50, updateDonute, 0);
-}
-
-void Building_One_Terrace(float x, float y){
-    polygon({{x + 20, y}, {x + 75, y}, {x + 75, y + 5}, {x + 20, y + 5}}, {122, 165, 198});
-    polygon({{x + 20, y + 5}, {x + 75, y + 5}, {x + 75, y + 10}, {x + 20, y + 10}}, {155, 204, 239});
-
-    polygon({{x + 75, y}, {x + 130, y}, {x + 130, y + 5}, {x + 75, y + 5}}, {78, 105, 131});
-    polygon({{x + 75, y + 5}, {x + 130, y + 5}, {x + 130, y + 10}, {x + 75, y + 10}}, {90, 125, 149});
-
-    NetworkTower(x + 20, y + 10);
-}
-
 void NetworkTowerThree(float x, float y, Color shadow = {19, 23, 69}, Color light = {244, 29, 27}){
     polygon({{x + 25, y}, {x + 30, y}, {x + 30, y + 15}, {x + 25, y + 15}}, shadow);
 
@@ -657,7 +717,282 @@ void NetworkTowerThree(float x, float y, Color shadow = {19, 23, 69}, Color ligh
     if(night) polygon({{x + 64, y + 40}, {x + 71, y + 40}, {x + 71, y + 45}, {x + 64, y + 45}}, light);
 }
 
-void Building_Tower(float x, float y, Color shadow = {19, 23, 69}, Color light = {130, 86, 199}, Color red = {244, 29, 27}){
+/// Other Building's Network Tower
+void NetworkTowerTwo(float x, float y, Color shadow = {19, 23, 69}, Color light = {244, 29, 27}){
+
+    polygon({{x + 25, y}, {x + 100, y}, {x + 100, y + 10}, {x + 25, y + 10}}, shadow);
+    polygon({{x + 45, y}, {x + 80, y}, {x + 80, y + 25}, {x + 45, y + 25}}, shadow);
+    polygon({{x + 95, y}, {x + 100, y}, {x + 100, y + 25}, {x + 95, y + 25}}, shadow);
+    polygon({{x + 75, y}, {x + 80, y}, {x + 80, y + 40}, {x + 75, y + 40}}, shadow);
+
+    if(night) polygon({{x + 74, y + 40}, {x + 81, y + 40}, {x + 81, y + 47}, {x + 74, y + 47}}, light);
+
+}
+
+/// Building Two
+void Building_Two(float x, float y, int m = 1){
+    if(night){
+        /// Base
+        polygon({{x + 0, y + 0}, {x + 70, y + 0}, {x + 70, y + 10}, {x + 0, y + 10}}, {49, 33, 196});
+        polygon({{x + 70, y + 0}, {x + 140, y + 0}, {x + 140, y + 10}, {x + 70, y + 10}}, {29, 1, 50});
+
+        /// First Floor
+        polygon({{x + 0, y + 10}, {x + 70, y + 10}, {x + 70, y + 20}, {x + 0, y + 20}}, {22, 37, 128});
+        polygon({{x + 0, y + 20}, {x + 70, y + 20}, {x + 70, y + 30}, {x + 0, y + 30}}, {33, 25, 108});
+
+        polygon({{x + 70, y + 10}, {x + 140, y + 10}, {x + 140, y + 20}, {x + 70, y + 20}}, {49, 0, 49});
+        polygon({{x + 70, y + 20}, {x + 140, y + 20}, {x + 140, y + 30}, {x + 70, y + 30}}, {41, 0, 54});
+
+        /// Second Floor
+        polygon({{x + 0, y + 30}, {x + 70, y + 30}, {x + 70, y + 40}, {x + 0, y + 40}}, {48, 38, 193});
+        polygon({{x + 70, y + 30}, {x + 140, y + 30}, {x + 140, y + 40}, {x + 70, y + 40}}, {36, 0, 51});
+
+        polygon({{x + 0, y + 40}, {x + 70, y + 40}, {x + 70, y + 50}, {x + 0, y + 50}}, {22, 37, 128});
+        polygon({{x + 0, y + 50}, {x + 70, y + 50}, {x + 70, y + 60}, {x + 0, y + 60}}, {33, 25, 108});
+
+        polygon({{x + 70, y + 40}, {x + 140, y + 40}, {x + 140, y + 50}, {x + 70, y + 50}}, {49, 0, 49});
+        polygon({{x + 70, y + 50}, {x + 140, y + 50}, {x + 140, y + 60}, {x + 70, y + 60}}, {41, 0, 54});
+
+        /// Third Floor
+        polygon({{x + 0, y + 60}, {x + 70, y + 60}, {x + 70, y + 70}, {x + 0, y + 70}}, {48, 38, 193});
+        polygon({{x + 70, y + 60}, {x + 140, y + 60}, {x + 140, y + 70}, {x + 70, y + 70}}, {27, 2, 50});
+
+        polygon({{x + 0, y + 70}, {x + 70, y + 70}, {x + 70, y + 80}, {x + 0, y + 80}}, {22, 37, 128});
+        polygon({{x + 0, y + 80}, {x + 70, y + 80}, {x + 70, y + 90}, {x + 0, y + 90}}, {33, 25, 108});
+
+        polygon({{x + 70, y + 70}, {x + 140, y + 70}, {x + 140, y + 80}, {x + 70, y + 80}}, {49, 0, 49});
+        polygon({{x + 70, y + 80}, {x + 140, y + 80}, {x + 140, y + 90}, {x + 70, y + 90}}, {41, 0, 54});
+
+        /// Middle Portion
+        polygon({{x + 0, y + 90}, {x + 70, y + 90}, {x + 70, y + 100}, {x + 0, y + 100}}, {77, 50, 202});
+        polygon({{x + 70, y + 90}, {x + 140, y + 90}, {x + 140, y + 100}, {x + 70, y + 100}}, {43, 17, 78});
+
+        polygon({{x + 0, y + 100}, {x + 140, y + 100}, {x + 140, y + 110}, {x + 0, y + 110}}, {27, 2, 50});
+
+        polygon({{x + 0, y + 110}, {x + 70, y + 110}, {x + 70, y + 125}, {x + 0, y + 125}}, {77, 50, 202});
+        polygon({{x + 70, y + 110}, {x + 140, y + 110}, {x + 140, y + 125}, {x + 70, y + 125}}, {43, 17, 78});
+
+        /// Fourth Floor
+        polygon({{x + 0, y + 125}, {x + 70, y + 125}, {x + 70, y + 135}, {x + 0, y + 135}}, {29, 53, 142});
+        polygon({{x + 0, y + 135}, {x + 70, y + 135}, {x + 70, y + 145}, {x + 0, y + 145}}, {40, 24, 106});
+
+        polygon({{x + 70, y + 125}, {x + 140, y + 125}, {x + 140, y + 145}, {x + 70, y + 145}}, {33, 11, 58});
+
+        /// Fifth Floor
+        polygon({{x + 0, y + 145}, {x + 70, y + 145}, {x + 70, y + 155}, {x + 0, y + 155}}, {36, 50, 127});
+        polygon({{x + 70, y + 145}, {x + 140, y + 145}, {x + 140, y + 155}, {x + 70, y + 155}}, {40, 24, 106});
+
+        polygon({{x + 0, y + 155}, {x + 70, y + 155}, {x + 70, y + 165}, {x + 0, y + 165}}, {29, 53, 142});
+        polygon({{x + 0, y + 165}, {x + 70, y + 165}, {x + 70, y + 175}, {x + 0, y + 175}}, {40, 24, 106});
+
+        polygon({{x + 70, y + 155}, {x + 140, y + 155}, {x + 140, y + 175}, {x + 70, y + 175}}, {33, 11, 58});
+
+        /// Sixth Floor
+        polygon({{x + 0, y + 175}, {x + 70, y + 175}, {x + 70, y + 185}, {x + 0, y + 185}}, {36, 50, 127});
+        polygon({{x + 70, y + 175}, {x + 140, y + 175}, {x + 140, y + 185}, {x + 70, y + 185}}, {40, 24, 106});
+
+        polygon({{x + 0, y + 185}, {x + 70, y + 185}, {x + 70, y + 195}, {x + 0, y + 195}}, {29, 53, 142});
+        polygon({{x + 0, y + 195}, {x + 70, y + 195}, {x + 70, y + 205}, {x + 0, y + 205}}, {40, 24, 106});
+
+        polygon({{x + 70, y + 185}, {x + 140, y + 185}, {x + 140, y + 205}, {x + 70, y + 205}}, {33, 11, 58});
+
+        /// First Floor's Windows
+        polygon({{x + 10, y + 10}, {x + 20, y + 10}, {x + 20, y + 25}, {x + 10, y + 25}}, {5, 67, 157});
+        polygon({{x + 30, y + 10}, {x + 40, y + 10}, {x + 40, y + 25}, {x + 30, y + 25}}, {34, 203, 197});
+        polygon({{x + 50, y + 10}, {x + 60, y + 10}, {x + 60, y + 25}, {x + 50, y + 25}}, {5, 67, 157});
+
+        polygon({{x + 80, y + 10}, {x + 90, y + 10}, {x + 90, y + 25}, {x + 80, y + 25}}, {29, 18, 90});
+        polygon({{x + 100, y + 10}, {x + 110, y + 10}, {x + 110, y + 25}, {x + 100, y + 25}}, {29, 18, 90});
+        polygon({{x + 120, y + 10}, {x + 130, y + 10}, {x + 130, y + 25}, {x + 120, y + 25}}, {29, 18, 90});
+
+        /// Second Floor's Windows
+        polygon({{x + 10, y + 40}, {x + 20, y + 40}, {x + 20, y + 55}, {x + 10, y + 55}}, {5, 67, 157});
+        polygon({{x + 30, y + 40}, {x + 40, y + 40}, {x + 40, y + 55}, {x + 30, y + 55}}, {34, 203, 197});
+        polygon({{x + 50, y + 40}, {x + 60, y + 40}, {x + 60, y + 55}, {x + 50, y + 55}}, {39, 80, 92});
+
+        polygon({{x + 80, y + 40}, {x + 90, y + 40}, {x + 90, y + 55}, {x + 80, y + 55}}, {39, 80, 92});
+        polygon({{x + 100, y + 40}, {x + 110, y + 40}, {x + 110, y + 55}, {x + 100, y + 55}}, {39, 80, 92});
+        polygon({{x + 120, y + 40}, {x + 130, y + 40}, {x + 130, y + 55}, {x + 120, y + 55}}, {5, 67, 157});
+
+        /// Third Floor's Windows
+        polygon({{x + 10, y + 70}, {x + 20, y + 70}, {x + 20, y + 85}, {x + 10, y + 85}}, {5, 67, 157});
+        polygon({{x + 30, y + 70}, {x + 40, y + 70}, {x + 40, y + 85}, {x + 30, y + 85}}, {34, 203, 197});
+        polygon({{x + 50, y + 70}, {x + 60, y + 70}, {x + 60, y + 85}, {x + 50, y + 85}}, {5, 67, 157});
+
+        polygon({{x + 80, y + 70}, {x + 90, y + 70}, {x + 90, y + 85}, {x + 80, y + 85}}, {34, 203, 197});
+        polygon({{x + 100, y + 70}, {x + 110, y + 70}, {x + 110, y + 85}, {x + 100, y + 85}}, {25, 67, 157});
+        polygon({{x + 120, y + 70}, {x + 130, y + 70}, {x + 130, y + 85}, {x + 120, y + 85}}, {5, 67, 157});
+
+        /// Fourth Floor's Windows
+        polygon({{x + 10, y + 125}, {x + 20, y + 125}, {x + 20, y + 140}, {x + 10, y + 140}}, {5, 67, 157});
+        polygon({{x + 30, y + 125}, {x + 40, y + 125}, {x + 40, y + 140}, {x + 30, y + 140}}, {34, 203, 197});
+        polygon({{x + 50, y + 125}, {x + 60, y + 125}, {x + 60, y + 140}, {x + 50, y + 140}}, {5, 67, 157});
+
+        polygon({{x + 80, y + 125}, {x + 90, y + 125}, {x + 90, y + 140}, {x + 80, y + 140}}, {5, 67, 157});
+        polygon({{x + 100, y + 125}, {x + 110, y + 125}, {x + 110, y + 140}, {x + 100, y + 140}}, {5, 67, 157});
+        polygon({{x + 120, y + 125}, {x + 130, y + 125}, {x + 130, y + 140}, {x + 120, y + 140}}, {5, 67, 157});
+
+        /// Fifth Floor's Windows
+        polygon({{x + 10, y + 155}, {x + 20, y + 155}, {x + 20, y + 170}, {x + 10, y + 170}}, {34, 203, 197});
+        polygon({{x + 30, y + 155}, {x + 40, y + 155}, {x + 40, y + 170}, {x + 30, y + 170}}, {34, 203, 197});
+        polygon({{x + 50, y + 155}, {x + 60, y + 155}, {x + 60, y + 170}, {x + 50, y + 170}}, {51, 111, 188});
+
+        polygon({{x + 80, y + 155}, {x + 90, y + 155}, {x + 90, y + 170}, {x + 80, y + 170}}, {5, 67, 157});
+        polygon({{x + 100, y + 155}, {x + 110, y + 155}, {x + 110, y + 170}, {x + 100, y + 170}}, {5, 67, 157});
+        polygon({{x + 120, y + 155}, {x + 130, y + 155}, {x + 130, y + 170}, {x + 120, y + 170}}, {5, 67, 157});
+
+        /// Sixth Floor's Windows
+        polygon({{x + 10, y + 185}, {x + 20, y + 185}, {x + 20, y + 200}, {x + 10, y + 200}}, {34, 203, 197});
+        polygon({{x + 30, y + 185}, {x + 40, y + 185}, {x + 40, y + 200}, {x + 30, y + 200}}, {34, 203, 197});
+        polygon({{x + 50, y + 185}, {x + 60, y + 185}, {x + 60, y + 200}, {x + 50, y + 200}}, {51, 111, 188});
+
+        polygon({{x + 80, y + 185}, {x + 90, y + 185}, {x + 90, y + 200}, {x + 80, y + 200}}, {51, 111, 188});
+        polygon({{x + 100, y + 185}, {x + 110, y + 185}, {x + 110, y + 200}, {x + 100, y + 200}}, {51, 111, 188});
+        polygon({{x + 120, y + 185}, {x + 130, y + 185}, {x + 130, y + 200}, {x + 120, y + 200}}, {51, 111, 188});
+
+        /// Terrace
+        polygon({{x + 0, y + 205}, {x + 70, y + 205}, {x + 70, y + 220}, {x + 0, y + 220}}, {123, 82, 198});
+        polygon({{x + 70, y + 205}, {x + 140, y + 205}, {x + 140, y + 220}, {x + 70, y + 220}}, {16, 40, 59});
+    }
+    else if(day){
+        Color WhiteOne = {245, 204, 160};
+        Color WhiteTwo = {153, 77, 28};
+        Color GrayOne = {228, 143, 69};
+        Color GrayTwo = {107, 36, 12};
+        Color GrayThree = {107, 36, 12};
+        Color WindowTypeOne = {251, 139, 36};
+        Color WindowTypeTwo = {227, 100, 20};
+        /// Base
+        polygon({{x + 0, y + 0}, {x + 70, y + 0}, {x + 70, y + 10}, {x + 0, y + 10}}, WhiteOne);
+        polygon({{x + 70, y + 0}, {x + 140, y + 0}, {x + 140, y + 10}, {x + 70, y + 10}}, GrayOne);
+
+        /// First Floor
+        polygon({{x + 0, y + 10}, {x + 70, y + 10}, {x + 70, y + 20}, {x + 0, y + 20}}, WhiteTwo);
+        polygon({{x + 0, y + 20}, {x + 70, y + 20}, {x + 70, y + 30}, {x + 0, y + 30}}, GrayTwo);
+
+        polygon({{x + 70, y + 10}, {x + 140, y + 10}, {x + 140, y + 30}, {x + 70, y + 30}}, GrayThree);
+
+        /// Second Floor
+        polygon({{x + 0, y + 30}, {x + 70, y + 30}, {x + 70, y + 40}, {x + 0, y + 40}}, WhiteOne);
+        polygon({{x + 70, y + 30}, {x + 140, y + 30}, {x + 140, y + 40}, {x + 70, y + 40}}, GrayOne);
+
+        polygon({{x + 0, y + 40}, {x + 70, y + 40}, {x + 70, y + 50}, {x + 0, y + 50}}, WhiteTwo);
+        polygon({{x + 0, y + 50}, {x + 70, y + 50}, {x + 70, y + 60}, {x + 0, y + 60}}, GrayTwo);
+
+        polygon({{x + 70, y + 40}, {x + 140, y + 40}, {x + 140, y + 60}, {x + 70, y + 60}}, GrayThree);
+
+        /// Third Floor
+        polygon({{x + 0, y + 60}, {x + 70, y + 60}, {x + 70, y + 70}, {x + 0, y + 70}}, WhiteOne);
+        polygon({{x + 70, y + 60}, {x + 140, y + 60}, {x + 140, y + 70}, {x + 70, y + 70}}, GrayOne);
+
+        polygon({{x + 0, y + 70}, {x + 70, y + 70}, {x + 70, y + 80}, {x + 0, y + 80}}, WhiteTwo);
+        polygon({{x + 0, y + 80}, {x + 70, y + 80}, {x + 70, y + 90}, {x + 0, y + 90}}, GrayTwo);
+
+        polygon({{x + 70, y + 70}, {x + 140, y + 70}, {x + 140, y + 90}, {x + 70, y + 90}}, GrayThree);
+
+        /// Middle Portion
+        polygon({{x + 0, y + 90}, {x + 70, y + 90}, {x + 70, y + 100}, {x + 0, y + 100}}, WhiteOne);
+        polygon({{x + 70, y + 90}, {x + 140, y + 90}, {x + 140, y + 100}, {x + 70, y + 100}}, GrayOne);
+
+        polygon({{x + 0, y + 100}, {x + 140, y + 100}, {x + 140, y + 110}, {x + 0, y + 110}}, {27, 2, 50});
+
+        polygon({{x + 0, y + 110}, {x + 70, y + 110}, {x + 70, y + 125}, {x + 0, y + 125}}, WhiteOne);
+        polygon({{x + 70, y + 110}, {x + 140, y + 110}, {x + 140, y + 125}, {x + 70, y + 125}}, GrayOne);
+
+        /// Fourth Floor
+        polygon({{x + 0, y + 125}, {x + 70, y + 125}, {x + 70, y + 135}, {x + 0, y + 135}}, WhiteTwo);
+        polygon({{x + 0, y + 135}, {x + 70, y + 135}, {x + 70, y + 145}, {x + 0, y + 145}}, GrayTwo);
+
+        polygon({{x + 70, y + 125}, {x + 140, y + 125}, {x + 140, y + 145}, {x + 70, y + 145}}, GrayThree);
+
+        /// Fifth Floor
+        polygon({{x + 0, y + 145}, {x + 70, y + 145}, {x + 70, y + 155}, {x + 0, y + 155}}, WhiteOne);
+        polygon({{x + 70, y + 145}, {x + 140, y + 145}, {x + 140, y + 155}, {x + 70, y + 155}}, GrayOne);
+
+        polygon({{x + 0, y + 155}, {x + 70, y + 155}, {x + 70, y + 165}, {x + 0, y + 165}}, WhiteTwo);
+        polygon({{x + 0, y + 165}, {x + 70, y + 165}, {x + 70, y + 175}, {x + 0, y + 175}}, GrayTwo);
+
+        polygon({{x + 70, y + 155}, {x + 140, y + 155}, {x + 140, y + 175}, {x + 70, y + 175}}, GrayThree);
+
+        /// Sixth Floor
+        polygon({{x + 0, y + 175}, {x + 70, y + 175}, {x + 70, y + 185}, {x + 0, y + 185}}, WhiteOne);
+        polygon({{x + 70, y + 175}, {x + 140, y + 175}, {x + 140, y + 185}, {x + 70, y + 185}}, GrayOne);
+
+        polygon({{x + 0, y + 185}, {x + 70, y + 185}, {x + 70, y + 195}, {x + 0, y + 195}}, WhiteTwo);
+        polygon({{x + 0, y + 195}, {x + 70, y + 195}, {x + 70, y + 205}, {x + 0, y + 205}}, GrayTwo);
+
+        polygon({{x + 70, y + 185}, {x + 140, y + 185}, {x + 140, y + 205}, {x + 70, y + 205}}, GrayThree);
+
+        /// First Floor's Windows
+        polygon({{x + 10, y + 10}, {x + 20, y + 10}, {x + 20, y + 25}, {x + 10, y + 25}}, WindowTypeTwo);
+        polygon({{x + 30, y + 10}, {x + 40, y + 10}, {x + 40, y + 25}, {x + 30, y + 25}}, WindowTypeOne);
+        polygon({{x + 50, y + 10}, {x + 60, y + 10}, {x + 60, y + 25}, {x + 50, y + 25}}, WindowTypeTwo);
+
+        polygon({{x + 80, y + 10}, {x + 90, y + 10}, {x + 90, y + 25}, {x + 80, y + 25}}, WindowTypeTwo);
+        polygon({{x + 100, y + 10}, {x + 110, y + 10}, {x + 110, y + 25}, {x + 100, y + 25}}, WindowTypeTwo);
+        polygon({{x + 120, y + 10}, {x + 130, y + 10}, {x + 130, y + 25}, {x + 120, y + 25}}, WindowTypeTwo);
+
+        /// Second Floor's Windows
+        polygon({{x + 10, y + 40}, {x + 20, y + 40}, {x + 20, y + 55}, {x + 10, y + 55}}, WindowTypeTwo);
+        polygon({{x + 30, y + 40}, {x + 40, y + 40}, {x + 40, y + 55}, {x + 30, y + 55}}, WindowTypeOne);
+        polygon({{x + 50, y + 40}, {x + 60, y + 40}, {x + 60, y + 55}, {x + 50, y + 55}}, WindowTypeTwo);
+
+        polygon({{x + 80, y + 40}, {x + 90, y + 40}, {x + 90, y + 55}, {x + 80, y + 55}}, WindowTypeTwo);
+        polygon({{x + 100, y + 40}, {x + 110, y + 40}, {x + 110, y + 55}, {x + 100, y + 55}}, WindowTypeTwo);
+        polygon({{x + 120, y + 40}, {x + 130, y + 40}, {x + 130, y + 55}, {x + 120, y + 55}}, WindowTypeTwo);
+
+        /// Third Floor's Windows
+        polygon({{x + 10, y + 70}, {x + 20, y + 70}, {x + 20, y + 85}, {x + 10, y + 85}}, WindowTypeTwo);
+        polygon({{x + 30, y + 70}, {x + 40, y + 70}, {x + 40, y + 85}, {x + 30, y + 85}}, WindowTypeOne);
+        polygon({{x + 50, y + 70}, {x + 60, y + 70}, {x + 60, y + 85}, {x + 50, y + 85}}, WindowTypeTwo);
+
+        polygon({{x + 80, y + 70}, {x + 90, y + 70}, {x + 90, y + 85}, {x + 80, y + 85}}, WindowTypeTwo);
+        polygon({{x + 100, y + 70}, {x + 110, y + 70}, {x + 110, y + 85}, {x + 100, y + 85}}, WindowTypeTwo);
+        polygon({{x + 120, y + 70}, {x + 130, y + 70}, {x + 130, y + 85}, {x + 120, y + 85}}, WindowTypeTwo);
+
+        /// Fourth Floor's Windows
+        polygon({{x + 10, y + 125}, {x + 20, y + 125}, {x + 20, y + 140}, {x + 10, y + 140}}, WindowTypeTwo);
+        polygon({{x + 30, y + 125}, {x + 40, y + 125}, {x + 40, y + 140}, {x + 30, y + 140}}, WindowTypeOne);
+        polygon({{x + 50, y + 125}, {x + 60, y + 125}, {x + 60, y + 140}, {x + 50, y + 140}}, WindowTypeTwo);
+
+        polygon({{x + 80, y + 125}, {x + 90, y + 125}, {x + 90, y + 140}, {x + 80, y + 140}}, WindowTypeTwo);
+        polygon({{x + 100, y + 125}, {x + 110, y + 125}, {x + 110, y + 140}, {x + 100, y + 140}}, WindowTypeTwo);
+        polygon({{x + 120, y + 125}, {x + 130, y + 125}, {x + 130, y + 140}, {x + 120, y + 140}}, WindowTypeTwo);
+
+        /// Fifth Floor's Windows
+        polygon({{x + 10, y + 155}, {x + 20, y + 155}, {x + 20, y + 170}, {x + 10, y + 170}}, WindowTypeOne);
+        polygon({{x + 30, y + 155}, {x + 40, y + 155}, {x + 40, y + 170}, {x + 30, y + 170}}, WindowTypeOne);
+        polygon({{x + 50, y + 155}, {x + 60, y + 155}, {x + 60, y + 170}, {x + 50, y + 170}}, WindowTypeTwo);
+
+        polygon({{x + 80, y + 155}, {x + 90, y + 155}, {x + 90, y + 170}, {x + 80, y + 170}}, WindowTypeTwo);
+        polygon({{x + 100, y + 155}, {x + 110, y + 155}, {x + 110, y + 170}, {x + 100, y + 170}}, WindowTypeTwo);
+        polygon({{x + 120, y + 155}, {x + 130, y + 155}, {x + 130, y + 170}, {x + 120, y + 170}}, WindowTypeTwo);
+
+        /// Sixth Floor's Windows
+        polygon({{x + 10, y + 185}, {x + 20, y + 185}, {x + 20, y + 200}, {x + 10, y + 200}}, WindowTypeOne);
+        polygon({{x + 30, y + 185}, {x + 40, y + 185}, {x + 40, y + 200}, {x + 30, y + 200}}, WindowTypeOne);
+        polygon({{x + 50, y + 185}, {x + 60, y + 185}, {x + 60, y + 200}, {x + 50, y + 200}}, WindowTypeTwo);
+
+        polygon({{x + 80, y + 185}, {x + 90, y + 185}, {x + 90, y + 200}, {x + 80, y + 200}}, WindowTypeTwo);
+        polygon({{x + 100, y + 185}, {x + 110, y + 185}, {x + 110, y + 200}, {x + 100, y + 200}}, WindowTypeTwo);
+        polygon({{x + 120, y + 185}, {x + 130, y + 185}, {x + 130, y + 200}, {x + 120, y + 200}}, WindowTypeTwo);
+
+        /// Terrace
+        polygon({{x + 0, y + 205}, {x + 70, y + 205}, {x + 70, y + 220}, {x + 0, y + 220}}, WhiteOne);
+        polygon({{x + 70, y + 205}, {x + 140, y + 205}, {x + 140, y + 220}, {x + 70, y + 220}}, GrayOne);
+    }
+}
+
+void Building_Tower(float x, float y, Color shadow = {19, 23, 69}, Color light = {130, 86, 199}, Color red = {244, 29, 27}, Color black = {19, 23, 69}, Color pole = {53, 41, 107}){
+    if(night){
+        light = {130, 86, 199};
+        shadow = {19, 23, 69};
+        pole = {53, 41, 107};
+    } else if (day){
+        light = {228, 143, 69};
+        shadow = {153, 77, 28};
+        pole = {107, 36, 12};
+    }
     polygon({{x + -5, y}, {x + 70, y}, {x + 70, y + 15}, {x + -5, y + 15}}, light);
     polygon({{x + 70, y}, {x + 145, y}, {x + 145, y + 15}, {x + 70, y + 15}}, shadow);
 
@@ -673,7 +1008,7 @@ void Building_Tower(float x, float y, Color shadow = {19, 23, 69}, Color light =
     polygon({{x + -5, y + 60}, {x + 55, y + 60}, {x + 55, y + 75}, {x + -5, y + 75}}, light);
     polygon({{x + 50, y + 60}, {x + 125, y + 60}, {x + 125, y + 75}, {x + 50, y + 75}}, shadow);
 
-    polygon({{x + 90, y + 15}, {x + 110, y + 15}, {x + 110, y + 90}, {x + 90, y + 90}}, {53, 41, 107});
+    polygon({{x + 90, y + 15}, {x + 110, y + 15}, {x + 110, y + 90}, {x + 90, y + 90}}, pole);
     polygon({{x + 85, y + 90}, {x + 110, y + 90}, {x + 100, y + 105}, {x + 75, y + 105}}, {40, 55, 76});
     polygon({{x + 85, y + 15}, {x + 90, y + 15}, {x + 90, y + 95}, {x + 85, y + 95}}, light);
     polygon({{x + 80, y + 30}, {x + 85, y + 30}, {x + 85, y + 105}, {x + 80, y + 105}}, light);
@@ -682,149 +1017,36 @@ void Building_Tower(float x, float y, Color shadow = {19, 23, 69}, Color light =
     polygon({{x + 15, y + 75}, {x + 40, y + 75}, {x + 40, y + 125}, {x + 15, y + 125}}, light);
     polygon({{x + 40, y + 75}, {x + 65, y + 75}, {x + 65, y + 110}, {x + 40, y + 110}}, shadow);
 
-    polygon({{x + 27, y + 120}, {x + 40, y + 120}, {x + 40, y + 125}, {x + 27, y + 125}}, shadow);
-    polygon({{x + 35, y + 125}, {x + 40, y + 125}, {x + 40, y + 135}, {x + 35, y + 135}}, shadow);
+    polygon({{x + 27, y + 120}, {x + 40, y + 120}, {x + 40, y + 125}, {x + 27, y + 125}}, black);
+    polygon({{x + 35, y + 125}, {x + 40, y + 125}, {x + 40, y + 135}, {x + 35, y + 135}}, black);
     if(night) polygon({{x + 34, y + 135}, {x + 41, y + 135}, {x + 41, y + 140}, {x + 34, y + 140}}, red);
 
     polygon({{x + 40, y + 90}, {x + 80, y + 90}, {x + 80, y + 110}, {x + 40, y + 110}}, light);
-    polygon({{x + 50, y + 105}, {x + 75, y + 105}, {x + 75, y + 110}, {x + 50, y + 110}}, shadow);
+    polygon({{x + 50, y + 105}, {x + 75, y + 105}, {x + 75, y + 110}, {x + 50, y + 110}}, black);
     polygon({{x + 65, y + 80}, {x + 80, y + 80}, {x + 80, y + 90}, {x + 65, y + 90}}, light);
-    polygon({{x + 85, y + 95}, {x + 90, y + 95}, {x + 90, y + 100}, {x + 85, y + 100}}, shadow);
+    polygon({{x + 85, y + 95}, {x + 90, y + 95}, {x + 90, y + 100}, {x + 85, y + 100}}, black);
 
-    polygon({{x + 95, y + 95}, {x + 100, y + 95}, {x + 100, y + 120}, {x + 95, y + 120}}, shadow);
+    polygon({{x + 95, y + 95}, {x + 100, y + 95}, {x + 100, y + 120}, {x + 95, y + 120}}, black);
     if(night) polygon({{x + 94, y + 120}, {x + 101, y + 120}, {x + 101, y + 125}, {x + 94, y + 125}}, red);
 }
 
-void Building_Two(float x, float y, int m = 1){
-    // Base
-    polygon({{x + m * 0, y + 0}, {x + m * 70, y + 0}, {x + m * 70, y + 10}, {x + m * 0, y + 10}}, {49, 33, 196});
-    polygon({{x + m * 70, y + 0}, {x + m * 140, y + 0}, {x + m * 140, y + 10}, {x + m * 70, y + 10}}, {29, 1, 50});
-
-    //First Floor
-
-    polygon({{x + m * 0, y + 10}, {x + m * 70, y + 10}, {x + m * 70, y + 20}, {x + m * 0, y + 20}}, {22, 37, 128});
-    polygon({{x + m * 0, y + 20}, {x + m * 70, y + 20}, {x + m * 70, y + 30}, {x + m * 0, y + 30}}, {33, 25, 108});
-
-    polygon({{x + m * 70, y + 10}, {x + m * 140, y + 10}, {x + m * 140, y + 20}, {x + m * 70, y + 20}}, {49, 0, 49});
-    polygon({{x + m * 70, y + 20}, {x + m * 140, y + 20}, {x + m * 140, y + 30}, {x + m * 70, y + 30}}, {41, 0, 54});
-
-    // Windows
-    polygon({{x + m * 10, y + 10}, {x + m * 20, y + 10}, {x + m * 20, y + 25}, {x + m * 10, y + 25}}, {5, 67, 157});
-    polygon({{x + m * 30, y + 10}, {x + m * 40, y + 10}, {x + m * 40, y + 25}, {x + m * 30, y + 25}}, {34, 203, 197});
-    polygon({{x + m * 50, y + 10}, {x + m * 60, y + 10}, {x + m * 60, y + 25}, {x + m * 50, y + 25}}, {5, 67, 157});
-
-    polygon({{x + m * 80, y + 10}, {x + m * 90, y + 10}, {x + m * 90, y + 25}, {x + m * 80, y + 25}}, {29, 18, 90});
-    polygon({{x + m * 100, y + 10}, {x + m * 110, y + 10}, {x + m * 110, y + 25}, {x + m * 100, y + 25}}, {29, 18, 90});
-    polygon({{x + m * 120, y + 10}, {x + m * 130, y + 10}, {x + m * 130, y + 25}, {x + m * 120, y + 25}}, {29, 18, 90});
-
-    //Second Floor
-    polygon({{x + m * 0, y + 30}, {x + m * 70, y + 30}, {x + m * 70, y + 40}, {x + m * 0, y + 40}}, {48, 38, 193});
-    polygon({{x + m * 70, y + 30}, {x + m * 140, y + 30}, {x + m * 140, y + 40}, {x + m * 70, y + 40}}, {36, 0, 51});
-
-    polygon({{x + m * 0, y + 40}, {x + m * 70, y + 40}, {x + m * 70, y + 50}, {x + m * 0, y + 50}}, {22, 37, 128});
-    polygon({{x + m * 0, y + 50}, {x + m * 70, y + 50}, {x + m * 70, y + 60}, {x + m * 0, y + 60}}, {33, 25, 108});
-
-    polygon({{x + m * 70, y + 40}, {x + m * 140, y + 40}, {x + m * 140, y + 50}, {x + m * 70, y + 50}}, {49, 0, 49});
-    polygon({{x + m * 70, y + 50}, {x + m * 140, y + 50}, {x + m * 140, y + 60}, {x + m * 70, y + 60}}, {41, 0, 54});
-
-    //polygon({{x + m * 70, y + 10}, {x + m * 140, y + 10}, {x + m * 140, y + 20}, {x + m * 70, y + 20}}, {0, 0, 0});
-    //polygon({{x + m * 70, y + 20}, {x + m * 140, y + 20}, {x + m * 140, y + 30}, {x + m * 70, y + 30}}, {255, 255, 255});
-
-    // Windows
-    polygon({{x + m * 10, y + 40}, {x + m * 20, y + 40}, {x + m * 20, y + 55}, {x + m * 10, y + 55}}, {5, 67, 157});
-    polygon({{x + m * 30, y + 40}, {x + m * 40, y + 40}, {x + m * 40, y + 55}, {x + m * 30, y + 55}}, {34, 203, 197});
-    polygon({{x + m * 50, y + 40}, {x + m * 60, y + 40}, {x + m * 60, y + 55}, {x + m * 50, y + 55}}, {39, 80, 92});
-
-    polygon({{x + m * 80, y + 40}, {x + m * 90, y + 40}, {x + m * 90, y + 55}, {x + m * 80, y + 55}}, {39, 80, 92});
-    polygon({{x + m * 100, y + 40}, {x + m * 110, y + 40}, {x + m * 110, y + 55}, {x + m * 100, y + 55}}, {39, 80, 92});
-    polygon({{x + m * 120, y + 40}, {x + m * 130, y + 40}, {x + m * 130, y + 55}, {x + m * 120, y + 55}}, {5, 67, 157});
-
-    // Third Floor
-    polygon({{x + m * 0, y + 60}, {x + m * 70, y + 60}, {x + m * 70, y + 70}, {x + m * 0, y + 70}}, {48, 38, 193});
-    polygon({{x + m * 70, y + 60}, {x + m * 140, y + 60}, {x + m * 140, y + 70}, {x + m * 70, y + 70}}, {27, 2, 50});
-
-    polygon({{x + m * 0, y + 70}, {x + m * 70, y + 70}, {x + m * 70, y + 80}, {x + m * 0, y + 80}}, {22, 37, 128});
-    polygon({{x + m * 0, y + 80}, {x + m * 70, y + 80}, {x + m * 70, y + 90}, {x + m * 0, y + 90}}, {33, 25, 108});
-
-    polygon({{x + m * 70, y + 70}, {x + m * 140, y + 70}, {x + m * 140, y + 80}, {x + m * 70, y + 80}}, {49, 0, 49});
-    polygon({{x + m * 70, y + 80}, {x + m * 140, y + 80}, {x + m * 140, y + 90}, {x + m * 70, y + 90}}, {41, 0, 54});
-
-    // Windows
-    polygon({{x + m * 10, y + 70}, {x + m * 20, y + 70}, {x + m * 20, y + 85}, {x + m * 10, y + 85}}, {5, 67, 157});
-    polygon({{x + m * 30, y + 70}, {x + m * 40, y + 70}, {x + m * 40, y + 85}, {x + m * 30, y + 85}}, {34, 203, 197});
-    polygon({{x + m * 50, y + 70}, {x + m * 60, y + 70}, {x + m * 60, y + 85}, {x + m * 50, y + 85}}, {5, 67, 157});
-
-    polygon({{x + m * 80, y + 70}, {x + m * 90, y + 70}, {x + m * 90, y + 85}, {x + m * 80, y + 85}}, {34, 203, 197});
-    polygon({{x + m * 100, y + 70}, {x + m * 110, y + 70}, {x + m * 110, y + 85}, {x + m * 100, y + 85}}, {25, 67, 157});
-    polygon({{x + m * 120, y + 70}, {x + m * 130, y + 70}, {x + m * 130, y + 85}, {x + m * 120, y + 85}}, {5, 67, 157});
-
-    // Middle Portion
-    polygon({{x + m * 0, y + 90}, {x + m * 70, y + 90}, {x + m * 70, y + 100}, {x + m * 0, y + 100}}, {77, 50, 202});
-    polygon({{x + m * 70, y + 90}, {x + m * 140, y + 90}, {x + m * 140, y + 100}, {x + m *70, y + 100}}, {43, 17, 78});
-
-    polygon({{x + m * 0, y + 100}, {x + m * 140, y + 100}, {x + m * 140, y + 110}, {x + m * 0, y + 110}}, {27, 2, 50});
-
-    polygon({{x + m * 0, y + 110}, {x + m * 70, y + 110}, {x + m * 70, y + 125}, {x + m * 0, y + 125}}, {77, 50, 202});
-    polygon({{x + m * 70, y + 110}, {x + m * 140, y + 110}, {x + m * 140, y + 125}, {x + m * 70, y + 125}}, {43, 17, 78});
-
-    // Fourth Floor
-
-    polygon({{x + m * 0, y + 125}, {x + m * 70, y + 125}, {x + m * 70, y + 135}, {x + m * 0, y + 135}}, {29, 53, 142});
-    polygon({{x + m * 0, y + 135}, {x + m * 70, y + 135}, {x + m * 70, y + 145}, {x + m * 0, y + 145}}, {40, 24, 106});
-
-    polygon({{x + m * 70, y + 125}, {x + m * 140, y + 125}, {x + m * 140, y + 145}, {x + m * 70, y + 145}}, {33, 11, 58});
-
-    // Windows
-    polygon({{x + m * 10, y + 125}, {x + m * 20, y + 125}, {x + m * 20, y + 140}, {x + m * 10, y + 140}}, {5, 67, 157});
-    polygon({{x + m * 30, y + 125}, {x + m * 40, y + 125}, {x + m * 40, y + 140}, {x + m * 30, y + 140}}, {34, 203, 197});
-    polygon({{x + m * 50, y + 125}, {x + m * 60, y + 125}, {x + m * 60, y + 140}, {x + m * 50, y + 140}}, {5, 67, 157});
-
-    polygon({{x + m * 80, y + 125}, {x + m * 90, y + 125}, {x + m * 90, y + 140}, {x + m * 80, y + 140}}, {5, 67, 157});
-    polygon({{x + m * 100, y + 125}, {x + m * 110, y + 125}, {x + m * 110, y + 140}, {x + m * 100, y + 140}}, {5, 67, 157});
-    polygon({{x + m * 120, y + 125}, {x + m * 130, y + 125}, {x + m * 130, y + 140}, {x + m * 120, y + 140}}, {5, 67, 157});
-
-    // Fifth Floor
-    polygon({{x + m * 0, y + 145}, {x + m * 70, y + 145}, {x + m * 70, y + 155}, {x + m * 0, y + 155}}, {36, 50, 127});
-    polygon({{x + m * 70, y + 145}, {x + m * 140, y + 145}, {x + m * 140, y + 155}, {x + m * 70, y + 155}}, {40, 24, 106});
-
-    polygon({{x + m * 0, y + 155}, {x + m * 70, y + 155}, {x + m * 70, y + 165}, {x + m * 0, y + 165}}, {29, 53, 142});
-    polygon({{x + m * 0, y + 165}, {x + m * 70, y + 165}, {x + m * 70, y + 175}, {x + m * 0, y + 175}}, {40, 24, 106});
-
-    polygon({{x + m * 70, y + 155}, {x + m * 140, y + 155}, {x + m * 140, y + 175}, {x + m * 70, y + 175}}, {33, 11, 58});
-
-    // Windows
-    polygon({{x + m * 10, y + 155}, {x + m * 20, y + 155}, {x + m * 20, y + 170}, {x + m * 10, y + 170}}, {34, 203, 197});
-    polygon({{x + m * 30, y + 155}, {x + m * 40, y + 155}, {x + m * 40, y + 170}, {x + m * 30, y + 170}}, {34, 203, 197});
-    polygon({{x + m * 50, y + 155}, {x + m * 60, y + 155}, {x + m * 60, y + 170}, {x + m * 50, y + 170}}, {51, 111, 188});
-
-    polygon({{x + m * 80, y + 155}, {x + m * 90, y + 155}, {x + m * 90, y + 170}, {x + m * 80, y + 170}}, {5, 67, 157});
-    polygon({{x + m * 100, y + 155}, {x + m * 110, y + 155}, {x + m * 110, y + 170}, {x + m * 100, y + 170}}, {5, 67, 157});
-    polygon({{x + m * 120, y + 155}, {x + m * 130, y + 155}, {x + m * 130, y + 170}, {x + m * 120, y + 170}}, {5, 67, 157});
-
-    // Sixth Floor
-    polygon({{x + m * 0, y + 175}, {x + m * 70, y + 175}, {x + m * 70, y + 185}, {x + m * 0, y + 185}}, {36, 50, 127});
-    polygon({{x + m * 70, y + 175}, {x + m * 140, y + 175}, {x + m * 140, y + 185}, {x + m * 70, y + 185}}, {40, 24, 106});
-
-    polygon({{x + m * 0, y + 185}, {x + m * 70, y + 185}, {x + m * 70, y + 195}, {x + m * 0, y + 195}}, {29, 53, 142});
-    polygon({{x + m * 0, y + 195}, {x + m * 70, y + 195}, {x + m * 70, y + 205}, {x + m * 0, y + 205}}, {40, 24, 106});
-
-    polygon({{x + m * 70, y + 185}, {x + m * 140, y + 185}, {x + m * 140, y + 205}, {x + m * 70, y + 205}}, {33, 11, 58});
-
-    // Windows
-    polygon({{x + m * 10, y + 185}, {x + m * 20, y + 185}, {x + m * 20, y + 200}, {x + m * 10, y + 200}}, {34, 203, 197});
-    polygon({{x + m * 30, y + 185}, {x + m * 40, y + 185}, {x + m * 40, y + 200}, {x + m * 30, y + 200}}, {34, 203, 197});
-    polygon({{x + m * 50, y + 185}, {x + m * 60, y + 185}, {x + m * 60, y + 200}, {x + m * 50, y + 200}}, {51, 111, 188});
-
-    polygon({{x + m * 80, y + 185}, {x + m * 90, y + 185}, {x + m * 90, y + 200}, {x + m * 80, y + 200}}, {51, 111, 188});
-    polygon({{x + m * 100, y + 185}, {x + m * 110, y + 185}, {x + m * 110, y + 200}, {x + m * 100, y + 200}}, {51, 111, 188});
-    polygon({{x + m * 120, y + 185}, {x + m * 130, y + 185}, {x + m * 130, y + 200}, {x + m * 120, y + 200}}, {51, 111, 188});
-
-    // Terrace
-    polygon({{x + m * 0, y + 205}, {x + m * 70, y + 205}, {x + m * 70, y + 220}, {x + m * 0, y + 220}}, {123, 82, 198});
-    polygon({{x + m * 70, y + 205}, {x + m * 140, y + 205}, {x + m * 140, y + 220}, {x + m * 70, y + 220}}, {16, 40, 59});
-}
-
 void Tomb(float x, float y, int m = 1, Color buildingWall = {132, 82, 211}, Color buildingWall2 = {33, 43, 80}, Color shadow = {56, 99, 164}, Color shadow2 = {16, 41, 83} , Color LeftWindow = {40, 82, 149}, Color RightWIndow = {9, 36, 78}){
+    if(night){
+        buildingWall = {132, 82, 211};
+        buildingWall2 = {33, 43, 80};
+        shadow = {56, 99, 164};
+        shadow2 = {16, 41, 83};
+        LeftWindow = {40, 82, 149};
+        RightWIndow = {9, 36, 78};
+    }
+    else if(day){
+        buildingWall = {245, 204, 160};
+        buildingWall2 = {228, 143, 69};
+        shadow = {153, 77, 28};
+        shadow2 = {107, 36, 12};
+        LeftWindow = {251, 139, 36};
+        RightWIndow = {227, 100, 20};
+    }
     polygon({{x + m * 0, y + 0}, {x + m * 40, y + 0}, {x + m * 40, y + 8}, {x + m * 0, y + 8}}, buildingWall);
     polygon({{x + m * 40, y + 0}, {x + m * 80, y + 0}, {x + m * 80, y + 8}, {x + m * 40, y + 8}}, buildingWall2);
 
@@ -893,14 +1115,28 @@ void Tomb(float x, float y, int m = 1, Color buildingWall = {132, 82, 211}, Colo
     polygon({{x + m * 40, y + 80}, {x + m * 75, y + 80}, {x + m * 75, y + 85}, {x + m * 40, y + 85}}, {122, 165, 198});
 }
 
-void Third_Building(float x, float y, int m = 1){
+void Third_Building(float x, float y, int m = 1, Color windowLightTop = {34, 203, 197}, Color windowLightBottom = {41, 94, 135}, Color windowDark = {28, 0, 149}, Color left = {135, 82, 214}, Color right = {26, 46, 74}, Color rightShadow = {6, 23, 52}, Color leftShadow = {33, 72, 136}){
 
     Building_One(200, 0);
-    Building_One(1700, 0);
+    Building_One(1720, 0);
 
-    // Terrace
-    polygon({{x + m * 0, y + 245}, {x + m * 75, y + 245}, {x + m * 75, y + 250}, {x + m * 0, y + 250}}, {135, 82, 214});
-    polygon({{x + m * 75, y + 245}, {x + m * 145, y + 245}, {x + m * 145, y + 250}, {x + m * 75, y + 250}}, {26, 46, 74});
+    if(night){
+        windowLightTop = {34, 203, 197};
+        windowLightBottom = {41, 94, 135};
+        windowDark = {28, 0, 149};
+        left = {135, 82, 214};
+        right = {26, 46, 74};
+        rightShadow = {6, 23, 52};
+        leftShadow = {33, 72, 136};
+    } else if(day){
+        windowDark = {227, 100, 20};
+        windowLightTop = {251, 139, 36};
+        windowLightBottom = {145, 15, 64};
+        left = {245, 204, 160};
+        right = {228, 143, 69};
+        rightShadow = {107, 36, 12};
+        leftShadow = {153, 77, 28};
+    }
 
     // Terrace Layer
     polygon({{x + m * 10, y + 250}, {x + m * 75, y + 250}, {x + m * 75, y + 255}, {x + m * 10, y + 255}}, {122, 165, 198});
@@ -917,145 +1153,68 @@ void Third_Building(float x, float y, int m = 1){
 
     polygon({{x + m * 20, y + 270}, {x + m * 130, y + 270}, {x + m * 130, y + 275}, {x + m * 20, y + 275}}, {0, 0, 0});
 
-    // Right Portion
-    polygon({{x + m * 75, y + 0}, {x + m * 85, y + 0}, {x + m * 85, y + 245}, {x + m * 75, y + 245}}, {26, 46, 74});
-
-    // Section One
-    polygon({{x + m * 85, y + 0}, {x + m * 105, y + 0}, {x + m * 105, y + 245}, {x + m * 85, y + 245}}, {6, 23, 52});
-
-    // Window Column Four
-    polygon({{x + m * 85, y + 0}, {x + m * 98, y + 0}, {x + m * 98, y + 10}, {x + m * 85, y + 10}}, {28, 0, 149});
-
-    polygon({{x + m * 85, y + 20}, {x + m * 98, y + 20}, {x + m * 98, y + 30}, {x + m * 85, y + 30}}, {34, 203, 197});
-    polygon({{x + m * 85, y + 30}, {x + m * 98, y + 30}, {x + m * 98, y + 40}, {x + m * 85, y + 40}}, {41, 94, 135});
-
-    polygon({{x + m * 85, y + 50}, {x + m * 98, y + 50}, {x + m * 98, y + 60}, {x + m * 85, y + 60}}, {34, 203, 197});
-    polygon({{x + m * 85, y + 60}, {x + m * 98, y + 60}, {x + m * 98, y + 70}, {x + m * 85, y + 70}}, {41, 94, 135});
-
-    polygon({{x + m * 85, y + 80}, {x + m * 98, y + 80}, {x + m * 98, y + 100}, {x + m * 85, y + 100}}, {28, 0, 149});
-
-    polygon({{x + m * 85, y + 110}, {x + m * 98, y + 110}, {x + m * 98, y + 130}, {x + m * 85, y + 130}}, {28, 0, 149});
-
-    polygon({{x + m * 85, y + 140}, {x + m * 98, y + 140}, {x + m * 98, y + 160}, {x + m * 85, y + 160}}, {28, 0, 149});
-
-    polygon({{x + m * 85, y + 170}, {x + m * 98, y + 170}, {x + m * 98, y + 180}, {x + m * 85, y + 180}}, {34, 203, 197});
-    polygon({{x + m * 85, y + 180}, {x + m * 98, y + 180}, {x + m * 98, y + 190}, {x + m * 85, y + 190}}, {41, 94, 135});
-
-    polygon({{x + m * 85, y + 200}, {x + m * 98, y + 200}, {x + m * 98, y + 220}, {x + m * 85, y + 220}}, {28, 0, 149});
-
-    polygon({{x + m * 85, y + 230}, {x + m * 98, y + 230}, {x + m * 98, y + 245}, {x + m * 85, y + 245}}, {28, 0, 149});
-
-    // Pillar
-    polygon({{x + m * 105, y + 0}, {x + m * 115, y + 0}, {x + m * 115, y + 245}, {x + m * 105, y + 245}}, {26, 46, 74});
-
-
-    polygon({{x + m * 115, y + 0}, {x + m * 135, y + 0}, {x + m * 135, y + 245}, {x + m * 115, y + 245}}, {6, 23, 52});
-
-    // Window Column Five
-    polygon({{x + m * 115, y + 0}, {x + m * 130, y + 0}, {x + m * 130, y + 10}, {x + m * 115, y + 10}}, {28, 0, 149});
-
-    polygon({{x + m * 115, y + 20}, {x + m * 130, y + 20}, {x + m * 130, y + 30}, {x + m * 115, y + 30}}, {34, 203, 197});
-    polygon({{x + m * 115, y + 30}, {x + m * 130, y + 30}, {x + m * 130, y + 40}, {x + m * 115, y + 40}}, {41, 94, 135});
-
-    polygon({{x + m * 115, y + 50}, {x + m * 130, y + 50}, {x + m * 130, y + 60}, {x + m * 115, y + 60}}, {34, 203, 197});
-    polygon({{x + m * 115, y + 60}, {x + m * 130, y + 60}, {x + m * 130, y + 70}, {x + m * 115, y + 70}}, {41, 94, 135});
-
-    polygon({{x + m * 115, y + 80}, {x + m * 130, y + 80}, {x + m * 130, y + 100}, {x + m * 115, y + 100}}, {28, 0, 149});
-
-    polygon({{x + m * 115, y + 110}, {x + m * 130, y + 110}, {x + m * 130, y + 130}, {x + m * 115, y + 130}}, {28, 0, 149});
-
-    polygon({{x + m * 115, y + 140}, {x + m * 130, y + 140}, {x + m * 130, y + 160}, {x + m * 115, y + 160}}, {28, 0, 149});
-
-    polygon({{x + m * 115, y + 170}, {x + m * 130, y + 170}, {x + m * 130, y + 180}, {x + m * 115, y + 180}}, {34, 203, 197});
-    polygon({{x + m * 115, y + 180}, {x + m * 130, y + 180}, {x + m * 130, y + 190}, {x + m * 115, y + 190}}, {41, 94, 135});
-
-    polygon({{x + m * 115, y + 200}, {x + m * 130, y + 200}, {x + m * 130, y + 220}, {x + m * 115, y + 220}}, {28, 0, 149});
-
-    polygon({{x + m * 115, y + 230}, {x + m * 130, y + 230}, {x + m * 130, y + 245}, {x + m * 115, y + 245}}, {28, 0, 149});
-
-    polygon({{x + m * 135, y + 0}, {x + m * 145, y + 0}, {x + m * 145, y + 245}, {x + m * 135, y + 245}}, {26, 46, 74});
-
-
     // Top Portion
     // Left Section
+    polygon({{x + m * 15, y + 275}, {x + m * 75, y + 275}, {x + m * 75, y + 400}, {x + m * 15, y + 400}}, left);
 
-    polygon({{x + m * 50, y + 275}, {x + m * 65, y + 275}, {x + m * 65, y + 395}, {x + m * 50, y + 395}}, {33, 72, 136});
-    polygon({{x + m * 15, y + 275}, {x + m * 40, y + 275}, {x + m * 40, y + 395}, {x + m * 15, y + 395}}, {33, 72, 136});
+
+    polygon({{x + m * 50, y + 280}, {x + m * 65, y + 280}, {x + m * 65, y + 395}, {x + m * 50, y + 395}}, leftShadow);
+    polygon({{x + m * 15, y + 280}, {x + m * 40, y + 280}, {x + m * 40, y + 395}, {x + m * 15, y + 395}}, leftShadow);
 
     // Window Column One
-    polygon({{x + m * 20, y + 290}, {x + m * 40, y + 290}, {x + m * 40, y + 300}, {x + m * 20, y + 300}}, {34, 203, 197});
-    polygon({{x + m * 20, y + 300}, {x + m * 40, y + 300}, {x + m * 40, y + 310}, {x + m * 20, y + 310}}, {41, 94, 135});
+    polygon({{x + m * 20, y + 290}, {x + m * 40, y + 290}, {x + m * 40, y + 300}, {x + m * 20, y + 300}}, windowLightBottom);
+    polygon({{x + m * 20, y + 300}, {x + m * 40, y + 300}, {x + m * 40, y + 310}, {x + m * 20, y + 310}}, windowLightTop);
 
-    polygon({{x + m * 20, y + 320}, {x + m * 40, y + 320}, {x + m * 40, y + 330}, {x + m * 20, y + 330}}, {34, 203, 197});
-    polygon({{x + m * 20, y + 330}, {x + m * 40, y + 330}, {x + m * 40, y + 340}, {x + m * 20, y + 340}}, {41, 94, 135});
+    polygon({{x + m * 20, y + 320}, {x + m * 40, y + 320}, {x + m * 40, y + 330}, {x + m * 20, y + 330}}, windowLightBottom);
+    polygon({{x + m * 20, y + 330}, {x + m * 40, y + 330}, {x + m * 40, y + 340}, {x + m * 20, y + 340}}, windowLightTop);
 
-    polygon({{x + m * 20, y + 350}, {x + m * 40, y + 350}, {x + m * 40, y + 360}, {x + m * 20, y + 360}}, {34, 203, 197});
-    polygon({{x + m * 20, y + 360}, {x + m * 40, y + 360}, {x + m * 40, y + 370}, {x + m * 20, y + 370}}, {41, 94, 135});
+    polygon({{x + m * 20, y + 350}, {x + m * 40, y + 350}, {x + m * 40, y + 360}, {x + m * 20, y + 360}}, windowLightBottom);
+    polygon({{x + m * 20, y + 360}, {x + m * 40, y + 360}, {x + m * 40, y + 370}, {x + m * 20, y + 370}}, windowLightTop);
 
-    polygon({{x + m * 20, y + 380}, {x + m * 40, y + 380}, {x + m * 40, y + 390}, {x + m * 20, y + 390}}, {34, 203, 197});
+    polygon({{x + m * 20, y + 380}, {x + m * 40, y + 380}, {x + m * 40, y + 390}, {x + m * 20, y + 390}}, windowLightTop);
 
-    // Pillar One
-    polygon({{x + m * 40, y + 275}, {x + m * 50, y + 275}, {x + m * 50, y + 395}, {x + m * 40, y + 395}}, {135, 82, 214});
+
 
     // Window Column Two
-    polygon({{x + m * 55, y + 290}, {x + m * 70, y + 290}, {x + m * 70, y + 300}, {x + m * 55, y + 300}}, {34, 203, 197});
-    polygon({{x + m * 55, y + 300}, {x + m * 70, y + 300}, {x + m * 70, y + 310}, {x + m * 55, y + 310}}, {41, 94, 135});
+    polygon({{x + m * 55, y + 290}, {x + m * 65, y + 290}, {x + m * 65, y + 300}, {x + m * 55, y + 300}}, windowLightBottom);
+    polygon({{x + m * 55, y + 300}, {x + m * 65, y + 300}, {x + m * 65, y + 310}, {x + m * 55, y + 310}}, windowLightTop);
 
-    polygon({{x + m * 55, y + 320}, {x + m * 70, y + 320}, {x + m * 70, y + 340}, {x + m * 55, y + 340}}, {28, 0, 149});
-    //polygon({{x + m * 55, y + 330}, {x + m * 70, y + 330}, {x + m * 70, y + 340}, {x + m * 55, y + 340}}, {41, 94, 135});
+    polygon({{x + m * 55, y + 320}, {x + m * 65, y + 320}, {x + m * 65, y + 340}, {x + m * 55, y + 340}}, windowDark);
 
-    polygon({{x + m * 55, y + 350}, {x + m * 70, y + 350}, {x + m * 70, y + 370}, {x + m * 55, y + 370}}, {28, 0, 149});
-    //polygon({{x + m * 55, y + 360}, {x + m * 70, y + 360}, {x + m * 70, y + 370}, {x + m * 55, y + 370}}, {41, 94, 135});
+    polygon({{x + m * 55, y + 350}, {x + m * 65, y + 350}, {x + m * 65, y + 370}, {x + m * 55, y + 370}}, windowDark);
 
-    polygon({{x + m * 55, y + 380}, {x + m * 70, y + 380}, {x + m * 70, y + 390}, {x + m * 55, y + 390}}, {28, 0, 149});
-
-    // Pillar Two
-    polygon({{x + m * 65, y + 275}, {x + m * 75, y + 275}, {x + m * 75, y + 395}, {x + m * 65, y + 395}}, {135, 82, 214});
+    polygon({{x + m * 55, y + 380}, {x + m * 65, y + 380}, {x + m * 65, y + 390}, {x + m * 55, y + 390}}, windowDark);
 
     // Right Section
     // Pillar One
-    polygon({{x + m * 75, y + 275}, {x + m * 85, y + 275}, {x + m * 85, y + 395}, {x + m * 75, y + 395}}, {26, 46, 74});
+    polygon({{x + m * 75, y + 275}, {x + m * 135, y + 275}, {x + m * 135, y + 400}, {x + m * 75, y + 400}}, right);
 
     // Shadowed Portion One
-    polygon({{x + m * 85, y + 275}, {x + m * 105, y + 275}, {x + m * 105, y + 395}, {x + m * 85, y + 395}}, {6, 23, 52});
+    polygon({{x + m * 85, y + 280}, {x + m * 105, y + 280}, {x + m * 105, y + 395}, {x + m * 85, y + 395}}, rightShadow);
 
     // Window Column Three
-    polygon({{x + m * 87, y + 290}, {x + m * 98, y + 290}, {x + m * 98, y + 300}, {x + m * 87, y + 300}}, {34, 203, 197});
-    polygon({{x + m * 87, y + 300}, {x + m * 98, y + 300}, {x + m * 98, y + 310}, {x + m * 87, y + 310}}, {41, 94, 135});
+    polygon({{x + m * 87, y + 290}, {x + m * 98, y + 290}, {x + m * 98, y + 300}, {x + m * 87, y + 300}}, windowLightBottom);
+    polygon({{x + m * 87, y + 300}, {x + m * 98, y + 300}, {x + m * 98, y + 310}, {x + m * 87, y + 310}}, windowLightTop);
 
-    polygon({{x + m * 87, y + 320}, {x + m * 98, y + 320}, {x + m * 98, y + 330}, {x + m * 87, y + 330}}, {34, 203, 197});
-    polygon({{x + m * 87, y + 330}, {x + m * 98, y + 330}, {x + m * 98, y + 340}, {x + m * 87, y + 340}}, {41, 94, 135});
+    polygon({{x + m * 87, y + 320}, {x + m * 98, y + 320}, {x + m * 98, y + 330}, {x + m * 87, y + 330}}, windowLightBottom);
+    polygon({{x + m * 87, y + 330}, {x + m * 98, y + 330}, {x + m * 98, y + 340}, {x + m * 87, y + 340}}, windowLightTop);
 
-    polygon({{x + m * 87, y + 350}, {x + m * 98, y + 350}, {x + m * 98, y + 370}, {x + m * 87, y + 370}}, {28, 0, 149});
+    polygon({{x + m * 87, y + 350}, {x + m * 98, y + 350}, {x + m * 98, y + 370}, {x + m * 87, y + 370}}, windowDark);
 
-    polygon({{x + m * 87, y + 380}, {x + m * 98, y + 380}, {x + m * 98, y + 390}, {x + m * 87, y + 390}}, {34, 203, 197});
-
-    // Pillar Two
-    polygon({{x + m * 105, y + 275}, {x + m * 115, y + 275}, {x + m * 115, y + 395}, {x + m * 105, y + 395}}, {26, 46, 74});
+    polygon({{x + m * 87, y + 380}, {x + m * 98, y + 380}, {x + m * 98, y + 390}, {x + m * 87, y + 390}}, windowLightBottom);
 
     // Shadowed Portion Two
-    polygon({{x + m * 115, y + 275}, {x + m * 135, y + 275}, {x + m * 135, y + 395}, {x + m * 115, y + 395}}, {6, 23, 52});
+    polygon({{x + m * 115, y + 280}, {x + m * 135, y + 280}, {x + m * 135, y + 395}, {x + m * 115, y + 395}}, rightShadow);
 
     // Window Column Four
-    polygon({{x + m * 117, y + 290}, {x + m * 127, y + 290}, {x + m * 127, y + 310}, {x + m * 117, y + 310}}, {28, 0, 149});
+    polygon({{x + m * 117, y + 290}, {x + m * 127, y + 290}, {x + m * 127, y + 310}, {x + m * 117, y + 310}}, windowDark);
 
-    polygon({{x + m * 117, y + 320}, {x + m * 127, y + 320}, {x + m * 127, y + 330}, {x + m * 117, y + 330}}, {34, 203, 197});
-    polygon({{x + m * 117, y + 330}, {x + m * 127, y + 330}, {x + m * 127, y + 340}, {x + m * 117, y + 340}}, {41, 94, 135});
+    polygon({{x + m * 117, y + 320}, {x + m * 127, y + 320}, {x + m * 127, y + 330}, {x + m * 117, y + 330}}, windowLightBottom);
+    polygon({{x + m * 117, y + 330}, {x + m * 127, y + 330}, {x + m * 127, y + 340}, {x + m * 117, y + 340}}, windowLightTop);
 
-    polygon({{x + m * 117, y + 350}, {x + m * 127, y + 350}, {x + m * 127, y + 370}, {x + m * 117, y + 370}}, {28, 0, 149});
+    polygon({{x + m * 117, y + 350}, {x + m * 127, y + 350}, {x + m * 127, y + 370}, {x + m * 117, y + 370}}, windowDark);
 
-    polygon({{x + m * 117, y + 380}, {x + m * 127, y + 380}, {x + m * 127, y + 390}, {x + m * 117, y + 390}}, {28, 0, 149});
-
-    // Pillar Three
-    polygon({{x + m * 130, y + 275}, {x + m * 135, y + 275}, {x + m * 135, y + 395}, {x + m * 130, y + 395}}, {26, 46, 74});
-
-    // Top Portion's Bottom Layer
-    polygon({{x + m * 15, y + 275}, {x + m * 75, y + 275}, {x + m * 75, y + 280}, {x + m * 15, y + 280}}, {135, 82, 214});
-    polygon({{x + m * 75, y + 275}, {x + m * 135, y + 275}, {x + m * 135, y + 280}, {x + m * 75, y + 280}}, {26, 46, 74});
-
-    // Top Portion's Top Layer
-    polygon({{x + m * 15, y + 395}, {x + m * 75, y + 395}, {x + m * 75, y + 400}, {x + m * 15, y + 400}}, {135, 82, 214});
-    polygon({{x + m * 75, y + 395}, {x + m * 135, y + 395}, {x + m * 135, y + 400}, {x + m * 75, y + 400}}, {26, 46, 74});
+    polygon({{x + m * 117, y + 380}, {x + m * 127, y + 380}, {x + m * 127, y + 390}, {x + m * 117, y + 390}}, windowDark);
 
     // Top Portion's Terrace Layer
     polygon({{x + m * 20, y + 400}, {x + m * 75, y + 400}, {x + m * 75, y + 405}, {x + m * 20, y + 405}}, {122, 165, 198});
@@ -1075,10 +1234,18 @@ void Third_Building(float x, float y, int m = 1){
 }
 
 void Fifth_Building(float x, float y, int m = 1, Color buildingWall = {130, 86, 199}, Color buildingWall2 = {32, 35, 76}){
-
+    if(night){
+        buildingWall = {130, 86, 199};
+        buildingWall2 = {32, 35, 76};
+    }
+    else if(day){
+        buildingWall = {228, 143, 69};
+        buildingWall2 = {153, 77, 28};
+    }
     polygon({{x + m * 0, y + 0}, {x + m * 70, y + 0}, {x + m * 70, y + 495}, {x + m * 0, y + 495}}, buildingWall);
     polygon({{x + m * 70, y + 0}, {x + m * 130, y + 0}, {x + m * 130, y + 495}, {x + m * 70, y + 495}}, buildingWall2);
 
+    if(night){
     // Bottom Window
     polygon({{x + m * 5, y + 0}, {x + m * 65, y + 0}, {x + m * 65, y + 10}, {x + m * 5, y + 10}}, {46, 21, 87});
 
@@ -1106,7 +1273,7 @@ void Fifth_Building(float x, float y, int m = 1, Color buildingWall = {130, 86, 
     polygon({{x + m * 5, y + 220}, {x + m * 65, y + 220}, {x + m * 65, y + 240}, {x + m * 5, y + 240}}, {102, 255, 147});
     polygon({{x + m * 5, y + 240}, {x + m * 65, y + 240}, {x + m * 65, y + 250}, {x + m * 5, y + 250}}, {67, 164, 97});
 
-    // Eigth Window
+    // Eight Window
     polygon({{x + m * 5, y + 260}, {x + m * 65, y + 260}, {x + m * 65, y + 290}, {x + m * 5, y + 290}}, {51, 87, 145});
 
      // Ninth Window
@@ -1128,6 +1295,66 @@ void Fifth_Building(float x, float y, int m = 1, Color buildingWall = {130, 86, 
     // Thirteenth Window
     polygon({{x + m * 5, y + 460}, {x + m * 65, y + 460}, {x + m * 65, y + 480}, {x + m * 5, y + 480}}, {102, 255, 147});
     polygon({{x + m * 5, y + 480}, {x + m * 65, y + 480}, {x + m * 65, y + 490}, {x + m * 5, y + 490}}, {67, 164, 97});
+
+    } else if(day){
+
+        Color windowBottom = {153, 77, 28};
+        Color windowTop = {107, 36, 12};
+
+        // Bottom Window
+        polygon({{x + m * 5, y + 0}, {x + m * 65, y + 0}, {x + m * 65, y + 10}, {x + m * 5, y + 10}}, windowTop);
+
+        // Second Window
+        polygon({{x + m * 5, y + 20}, {x + m * 65, y + 20}, {x + m * 65, y + 40}, {x + m * 5, y + 40}}, windowBottom);
+        polygon({{x + m * 5, y + 40}, {x + m * 65, y + 40}, {x + m * 65, y + 50}, {x + m * 5, y + 50}}, windowTop);
+
+        // Third Window
+        polygon({{x + m * 5, y + 60}, {x + m * 65, y + 60}, {x + m * 65, y + 80}, {x + m * 5, y + 80}}, windowBottom);
+        polygon({{x + m * 5, y + 80}, {x + m * 65, y + 80}, {x + m * 65, y + 90}, {x + m * 5, y + 90}}, windowTop);
+
+        // Forth Window
+        polygon({{x + m * 5, y + 100}, {x + m * 65, y + 100}, {x + m * 65, y + 120}, {x + m * 5, y + 120}}, windowBottom);
+        polygon({{x + m * 5, y + 120}, {x + m * 65, y + 120}, {x + m * 65, y + 130}, {x + m * 5, y + 130}}, windowTop);
+
+        // Fifth Window
+        polygon({{x + m * 5, y + 140}, {x + m * 65, y + 140}, {x + m * 65, y + 160}, {x + m * 5, y + 160}}, windowBottom);
+        polygon({{x + m * 5, y + 160}, {x + m * 65, y + 160}, {x + m * 65, y + 170}, {x + m * 5, y + 170}}, windowTop);
+
+        // Sixth Window
+        polygon({{x + m * 5, y + 180}, {x + m * 65, y + 180}, {x + m * 65, y + 200}, {x + m * 5, y + 200}}, windowBottom);
+        polygon({{x + m * 5, y + 200}, {x + m * 65, y + 200}, {x + m * 65, y + 210}, {x + m * 5, y + 210}}, windowTop);
+
+        // Seventh Window
+        polygon({{x + m * 5, y + 220}, {x + m * 65, y + 220}, {x + m * 65, y + 240}, {x + m * 5, y + 240}}, windowBottom);
+        polygon({{x + m * 5, y + 240}, {x + m * 65, y + 240}, {x + m * 65, y + 250}, {x + m * 5, y + 250}}, windowTop);
+
+        // Eight Window
+        polygon({{x + m * 5, y + 260}, {x + m * 65, y + 260}, {x + m * 65, y + 290}, {x + m * 5, y + 290}}, windowTop);
+
+         // Ninth Window
+        polygon({{x + m * 5, y + 300}, {x + m * 65, y + 300}, {x + m * 65, y + 320}, {x + m * 5, y + 320}}, windowBottom);
+        polygon({{x + m * 5, y + 320}, {x + m * 65, y + 320}, {x + m * 65, y + 330}, {x + m * 5, y + 330}}, windowTop);
+
+        // Tenth Window
+        polygon({{x + m * 5, y + 340}, {x + m * 65, y + 340}, {x + m * 65, y + 360}, {x + m * 5, y + 360}}, windowBottom);
+        polygon({{x + m * 5, y + 360}, {x + m * 65, y + 360}, {x + m * 65, y + 370}, {x + m * 5, y + 370}}, windowTop);
+
+        // Eleventh Window
+        polygon({{x + m * 5, y + 380}, {x + m * 65, y + 380}, {x + m * 65, y + 400}, {x + m * 5, y + 400}}, windowBottom);
+        polygon({{x + m * 5, y + 400}, {x + m * 65, y + 400}, {x + m * 65, y + 410}, {x + m * 5, y + 410}}, windowTop);
+
+        // Twelfth Window
+        polygon({{x + m * 5, y + 420}, {x + m * 65, y + 420}, {x + m * 65, y + 440}, {x + m * 5, y + 440}}, windowBottom);
+        polygon({{x + m * 5, y + 440}, {x + m * 65, y + 440}, {x + m * 65, y + 450}, {x + m * 5, y + 450}}, windowTop);
+
+        // Thirteenth Window
+        polygon({{x + m * 5, y + 460}, {x + m * 65, y + 460}, {x + m * 65, y + 480}, {x + m * 5, y + 480}}, windowBottom);
+        polygon({{x + m * 5, y + 480}, {x + m * 65, y + 480}, {x + m * 65, y + 490}, {x + m * 5, y + 490}}, windowTop);
+    }
+
+
+
+
 }
 
 void SignBoard_Two(float x, float y, Color shadow = {19, 23, 69}){
@@ -1156,9 +1383,35 @@ void SignBoard_Two(float x, float y, Color shadow = {19, 23, 69}){
 
 }
 
-void Eight_Building(float x, float y, int m = 1, Color buildingWall = {24, 31, 61}, Color buildingWall2  = {42, 33, 186}, Color buildingWall3 = {35, 4, 46}, Color buildingWall4 = {27, 46, 75}){
+void Eight_Building(float x, float y, int m = 1, Color buildingWall = {24, 31, 61}, Color buildingWall2  = {42, 33, 186}, Color buildingWall3 = {35, 4, 46}, Color buildingWall4 = {27, 46, 75},
+                    Color windowLightBottom = {34, 203, 197}, Color windowLightTop = {19, 122, 117}, Color SecondwindowLightBottom = {7, 79, 178}, Color SecondwindowLightTop = {18, 43, 135},
+                    Color windowDarkBottom = {31, 19, 92}, Color windowDarkTop = {41, 0, 70}, Color SecondwindowDarkBottom = {23, 125, 122}, Color SecondwindowDarkTop = {39, 80, 92}
+                    ){
+    if(night){
+        buildingWall = {24, 31, 61};
+        buildingWall2  = {42, 33, 186};
+        windowLightBottom = {34, 203, 197};
+        windowLightTop = {19, 122, 117};
+        SecondwindowLightBottom = {7, 79, 178};
+        SecondwindowLightTop = {18, 43, 135};
+        windowDarkBottom = {31, 19, 92};
+        windowDarkTop = {41, 0, 70};
+        SecondwindowDarkBottom = {23, 125, 122};
+        SecondwindowDarkTop = {39, 80, 92};
+    }else if(day){
+        buildingWall2 = {153, 77, 28};
+        buildingWall  = {228, 143, 69};
+        windowLightBottom = {251, 139, 36};
+        windowLightTop = {145, 15, 64};
+        SecondwindowLightBottom = {153, 77, 28};
+        SecondwindowLightTop = {107, 36, 12};
+        windowDarkBottom = {107, 36, 12};
+        windowDarkTop = {53, 27, 28};
+        SecondwindowDarkBottom = {226, 139, 59};
+        SecondwindowDarkTop = {125, 12, 55};
+    }
     for (int i = 0; i < 200; ++i) {
-        Color interpolatedColor = interpolateColor(buildingWall2, buildingWall, static_cast<float>(i) / 200.0f);
+        Color interpolatedColor = interpolateColor(buildingWall, buildingWall2, static_cast<float>(i) / 200.0f);
         polygon({{x + m * i, y + 0}, {x + m * (i + 1), y + 0}, {x + m * (i + 1), y + 250}, {x + m * i, y + 250}}, interpolatedColor);
     }
 
@@ -1168,138 +1421,138 @@ void Eight_Building(float x, float y, int m = 1, Color buildingWall = {24, 31, 6
     polygon({{x + m * 40, y + 250}, {x + m * 160, y + 250}, {x + m * 160, y + 255}, {x + m * 40, y + 255}}, {0, 0, 0});
 
     // Windows Layer One
-    polygon({{x + m * 0, y + 10}, {x + m * 40, y + 10}, {x + m * 40, y + 20}, {x + m * 0, y + 20}}, {34, 203, 197});
-    polygon({{x + m * 0, y + 20}, {x + m * 40, y + 20}, {x + m * 40, y + 30}, {x + m * 0, y + 30}}, {19, 122, 117});
+    polygon({{x + m * 0, y + 10}, {x + m * 40, y + 10}, {x + m * 40, y + 20}, {x + m * 0, y + 20}}, windowLightBottom);
+    polygon({{x + m * 0, y + 20}, {x + m * 40, y + 20}, {x + m * 40, y + 30}, {x + m * 0, y + 30}}, windowLightTop);
 
-    polygon({{x + m * 50, y + 10}, {x + m * 100, y + 10}, {x + m * 100, y + 20}, {x + m * 50, y + 20}}, {7, 79, 178});
-    polygon({{x + m * 50, y + 20}, {x + m * 100, y + 20}, {x + m * 100, y + 30}, {x + m * 50, y + 30}}, {18, 43, 135});
+    polygon({{x + m * 50, y + 10}, {x + m * 100, y + 10}, {x + m * 100, y + 20}, {x + m * 50, y + 20}}, SecondwindowLightBottom);
+    polygon({{x + m * 50, y + 20}, {x + m * 100, y + 20}, {x + m * 100, y + 30}, {x + m * 50, y + 30}}, SecondwindowLightTop);
 
 
-    polygon({{x + m * 100, y + 10}, {x + m * 140, y + 10}, {x + m * 140, y + 20}, {x + m * 100, y + 20}}, {31, 19, 92});
-    polygon({{x + m * 100, y + 20}, {x + m * 140, y + 20}, {x + m * 140, y + 30}, {x + m * 100, y + 30}}, {41, 0, 70});
+    polygon({{x + m * 100, y + 10}, {x + m * 140, y + 10}, {x + m * 140, y + 20}, {x + m * 100, y + 20}}, windowDarkBottom);
+    polygon({{x + m * 100, y + 20}, {x + m * 140, y + 20}, {x + m * 140, y + 30}, {x + m * 100, y + 30}}, windowDarkTop);
 
-    polygon({{x + m * 150, y + 10}, {x + m * 175, y + 10}, {x + m * 175, y + 20}, {x + m * 150, y + 20}}, {31, 19, 92});
-    polygon({{x + m * 150, y + 20}, {x + m * 175, y + 20}, {x + m * 175, y + 30}, {x + m * 150, y + 30}}, {41, 0, 70});
+    polygon({{x + m * 150, y + 10}, {x + m * 175, y + 10}, {x + m * 175, y + 20}, {x + m * 150, y + 20}}, windowDarkBottom);
+    polygon({{x + m * 150, y + 20}, {x + m * 175, y + 20}, {x + m * 175, y + 30}, {x + m * 150, y + 30}}, windowDarkTop);
 
-    polygon({{x + m * 180, y + 10}, {x + m * 200, y + 10}, {x + m * 200, y + 20}, {x + m * 180, y + 20}}, {23, 125, 122});
-    polygon({{x + m * 180, y + 20}, {x + m * 200, y + 20}, {x + m * 200, y + 30}, {x + m * 180, y + 30}}, {39, 80, 92});
+    polygon({{x + m * 180, y + 10}, {x + m * 200, y + 10}, {x + m * 200, y + 20}, {x + m * 180, y + 20}}, SecondwindowDarkBottom);
+    polygon({{x + m * 180, y + 20}, {x + m * 200, y + 20}, {x + m * 200, y + 30}, {x + m * 180, y + 30}}, SecondwindowDarkTop);
 
     // Windows Layer Two
-    polygon({{x + m * 0, y + 40}, {x + m * 20, y + 40}, {x + m * 20, y + 50}, {x + m * 0, y + 50}}, {7, 79, 178});
-    polygon({{x + m * 0, y + 50}, {x + m * 20, y + 50}, {x + m * 20, y + 60}, {x + m * 0, y + 60}}, {18, 43, 135});
+    polygon({{x + m * 0, y + 40}, {x + m * 20, y + 40}, {x + m * 20, y + 50}, {x + m * 0, y + 50}}, SecondwindowLightBottom);
+    polygon({{x + m * 0, y + 50}, {x + m * 20, y + 50}, {x + m * 20, y + 60}, {x + m * 0, y + 60}}, SecondwindowLightTop);
 
-    polygon({{x + m * 30, y + 40}, {x + m * 50, y + 40}, {x + m * 50, y + 50}, {x + m * 30, y + 50}}, {34, 203, 197});
-    polygon({{x + m * 30, y + 50}, {x + m * 50, y + 50}, {x + m * 50, y + 60}, {x + m * 30, y + 60}}, {19, 122, 1173});
+    polygon({{x + m * 30, y + 40}, {x + m * 50, y + 40}, {x + m * 50, y + 50}, {x + m * 30, y + 50}}, windowLightBottom);
+    polygon({{x + m * 30, y + 50}, {x + m * 50, y + 50}, {x + m * 50, y + 60}, {x + m * 30, y + 60}}, windowLightTop);
 
-    polygon({{x + m * 60, y + 40}, {x + m * 100, y + 40}, {x + m * 100, y + 50}, {x + m * 60, y + 50}}, {34, 203, 197});
-    polygon({{x + m * 60, y + 50}, {x + m * 100, y + 50}, {x + m * 100, y + 60}, {x + m * 60, y + 60}}, {19, 122, 117});
+    polygon({{x + m * 60, y + 40}, {x + m * 100, y + 40}, {x + m * 100, y + 50}, {x + m * 60, y + 50}}, windowLightBottom);
+    polygon({{x + m * 60, y + 50}, {x + m * 100, y + 50}, {x + m * 100, y + 60}, {x + m * 60, y + 60}}, windowLightTop);
 
-    polygon({{x + m * 100, y + 40}, {x + m * 130, y + 40}, {x + m * 130, y + 50}, {x + m * 100, y + 50}}, {23, 125, 122});
-    polygon({{x + m * 100, y + 50}, {x + m * 130, y + 50}, {x + m * 130, y + 60}, {x + m * 100, y + 60}}, {39, 80, 92});
+    polygon({{x + m * 100, y + 40}, {x + m * 130, y + 40}, {x + m * 130, y + 50}, {x + m * 100, y + 50}}, SecondwindowDarkBottom);
+    polygon({{x + m * 100, y + 50}, {x + m * 130, y + 50}, {x + m * 130, y + 60}, {x + m * 100, y + 60}}, SecondwindowDarkTop);
 
-    polygon({{x + m * 140, y + 40}, {x + m * 160, y + 40}, {x + m * 160, y + 50}, {x + m * 140, y + 50}}, {31, 19, 92});
-    polygon({{x + m * 140, y + 50}, {x + m * 160, y + 50}, {x + m * 160, y + 60}, {x + m * 140, y + 60}}, {41, 0, 70});
+    polygon({{x + m * 140, y + 40}, {x + m * 160, y + 40}, {x + m * 160, y + 50}, {x + m * 140, y + 50}}, windowDarkBottom);
+    polygon({{x + m * 140, y + 50}, {x + m * 160, y + 50}, {x + m * 160, y + 60}, {x + m * 140, y + 60}}, windowDarkTop);
 
-    polygon({{x + m * 170, y + 40}, {x + m * 200, y + 40}, {x + m * 200, y + 50}, {x + m * 170, y + 50}}, {23, 125, 122});
-    polygon({{x + m * 170, y + 50}, {x + m * 200, y + 50}, {x + m * 200, y + 60}, {x + m * 170, y + 60}}, {39, 80, 92});
+    polygon({{x + m * 170, y + 40}, {x + m * 200, y + 40}, {x + m * 200, y + 50}, {x + m * 170, y + 50}}, SecondwindowDarkBottom);
+    polygon({{x + m * 170, y + 50}, {x + m * 200, y + 50}, {x + m * 200, y + 60}, {x + m * 170, y + 60}}, SecondwindowDarkTop);
 
     // Window Layer Three
-    polygon({{x + m * 0, y + 80}, {x + m * 20, y + 80}, {x + m * 20, y + 90}, {x + m * 0, y + 90}}, {7, 79, 178});
-    polygon({{x + m * 0, y + 90}, {x + m * 20, y + 90}, {x + m * 20, y + 100}, {x + m * 0, y + 100}}, {18, 43, 135});
+    polygon({{x + m * 0, y + 80}, {x + m * 20, y + 80}, {x + m * 20, y + 90}, {x + m * 0, y + 90}}, SecondwindowLightBottom);
+    polygon({{x + m * 0, y + 90}, {x + m * 20, y + 90}, {x + m * 20, y + 100}, {x + m * 0, y + 100}}, windowLightTop);
 
-    polygon({{x + m * 30, y + 80}, {x + m * 50, y + 80}, {x + m * 50, y + 90}, {x + m * 30, y + 90}}, {7, 79, 178});
-    polygon({{x + m * 30, y + 90}, {x + m * 50, y + 90}, {x + m * 50, y + 100}, {x + m * 30, y + 100}}, {18, 43, 135});
+    polygon({{x + m * 30, y + 80}, {x + m * 50, y + 80}, {x + m * 50, y + 90}, {x + m * 30, y + 90}}, SecondwindowLightBottom);
+    polygon({{x + m * 30, y + 90}, {x + m * 50, y + 90}, {x + m * 50, y + 100}, {x + m * 30, y + 100}}, windowLightTop);
 
-    polygon({{x + m * 60, y + 80}, {x + m * 80, y + 80}, {x + m * 80, y + 90}, {x + m * 60, y + 90}}, {7, 79, 178});
-    polygon({{x + m * 60, y + 90}, {x + m * 80, y + 90}, {x + m * 80, y + 100}, {x + m * 60, y + 100}}, {18, 43, 135});
+    polygon({{x + m * 60, y + 80}, {x + m * 80, y + 80}, {x + m * 80, y + 90}, {x + m * 60, y + 90}}, SecondwindowLightBottom);
+    polygon({{x + m * 60, y + 90}, {x + m * 80, y + 90}, {x + m * 80, y + 100}, {x + m * 60, y + 100}}, windowLightTop);
 
-    polygon({{x + m * 90, y + 80}, {x + m * 100, y + 80}, {x + m * 100, y + 90}, {x + m * 90, y + 90}}, {7, 79, 178});
-    polygon({{x + m * 90, y + 90}, {x + m * 100, y + 90}, {x + m * 100, y + 100}, {x + m * 90, y + 100}}, {18, 43, 135});
+    polygon({{x + m * 90, y + 80}, {x + m * 100, y + 80}, {x + m * 100, y + 90}, {x + m * 90, y + 90}}, SecondwindowLightBottom);
+    polygon({{x + m * 90, y + 90}, {x + m * 100, y + 90}, {x + m * 100, y + 100}, {x + m * 90, y + 100}}, windowLightTop);
 
-    polygon({{x + m * 100, y + 80}, {x + m * 110, y + 80}, {x + m * 110, y + 90}, {x + m * 100, y + 90}}, {31, 19, 92});
-    polygon({{x + m * 100, y + 90}, {x + m * 110, y + 90}, {x + m * 110, y + 100}, {x + m * 100, y + 100}}, {41, 0, 70});
+    polygon({{x + m * 100, y + 80}, {x + m * 110, y + 80}, {x + m * 110, y + 90}, {x + m * 100, y + 90}}, windowDarkBottom);
+    polygon({{x + m * 100, y + 90}, {x + m * 110, y + 90}, {x + m * 110, y + 100}, {x + m * 100, y + 100}}, windowDarkTop);
 
-    polygon({{x + m * 120, y + 80}, {x + m * 140, y + 80}, {x + m * 140, y + 90}, {x + m * 120, y + 90}}, {31, 19, 92});
-    polygon({{x + m * 120, y + 90}, {x + m * 140, y + 90}, {x + m * 140, y + 100}, {x + m * 120, y + 100}}, {41, 0, 70});
+    polygon({{x + m * 120, y + 80}, {x + m * 140, y + 80}, {x + m * 140, y + 90}, {x + m * 120, y + 90}}, windowDarkBottom);
+    polygon({{x + m * 120, y + 90}, {x + m * 140, y + 90}, {x + m * 140, y + 100}, {x + m * 120, y + 100}}, windowDarkTop);
 
-    polygon({{x + m * 150, y + 80}, {x + m * 170, y + 80}, {x + m * 170, y + 90}, {x + m * 150, y + 90}}, {31, 19, 92});
-    polygon({{x + m * 150, y + 90}, {x + m * 170, y + 90}, {x + m * 170, y + 100}, {x + m * 150, y + 100}}, {41, 0, 70});
+    polygon({{x + m * 150, y + 80}, {x + m * 170, y + 80}, {x + m * 170, y + 90}, {x + m * 150, y + 90}}, windowDarkBottom);
+    polygon({{x + m * 150, y + 90}, {x + m * 170, y + 90}, {x + m * 170, y + 100}, {x + m * 150, y + 100}}, windowDarkTop);
 
-    polygon({{x + m * 180, y + 80}, {x + m * 200, y + 80}, {x + m * 200, y + 90}, {x + m * 180, y + 90}}, {31, 19, 92});
-    polygon({{x + m * 180, y + 90}, {x + m * 200, y + 90}, {x + m * 200, y + 100}, {x + m * 180, y + 100}}, {41, 0, 70});
+    polygon({{x + m * 180, y + 80}, {x + m * 200, y + 80}, {x + m * 200, y + 90}, {x + m * 180, y + 90}}, windowDarkBottom);
+    polygon({{x + m * 180, y + 90}, {x + m * 200, y + 90}, {x + m * 200, y + 100}, {x + m * 180, y + 100}}, windowDarkTop);
 
     // Window Layer Four
-    polygon({{x + m * 0, y + 115}, {x + m * 40, y + 115}, {x + m * 40, y + 125}, {x + m * 0, y + 125}}, {34, 203, 197});
-    polygon({{x + m * 0, y + 125}, {x + m * 40, y + 125}, {x + m * 40, y + 135}, {x + m * 0, y + 135}}, {19, 122, 117});
+    polygon({{x + m * 0, y + 115}, {x + m * 40, y + 115}, {x + m * 40, y + 125}, {x + m * 0, y + 125}}, windowLightBottom);
+    polygon({{x + m * 0, y + 125}, {x + m * 40, y + 125}, {x + m * 40, y + 135}, {x + m * 0, y + 135}}, windowLightTop);
 
-    polygon({{x + m * 50, y + 115}, {x + m * 100, y + 115}, {x + m * 100, y + 125}, {x + m * 50, y + 125}}, {7, 79, 178});
-    polygon({{x + m * 50, y + 125}, {x + m * 100, y + 125}, {x + m * 100, y + 135}, {x + m * 50, y + 135}}, {18, 43, 135});
+    polygon({{x + m * 50, y + 115}, {x + m * 100, y + 115}, {x + m * 100, y + 125}, {x + m * 50, y + 125}}, SecondwindowLightBottom);
+    polygon({{x + m * 50, y + 125}, {x + m * 100, y + 125}, {x + m * 100, y + 135}, {x + m * 50, y + 135}}, windowLightTop);
 
-    polygon({{x + m * 100, y + 115}, {x + m * 150, y + 115}, {x + m * 150, y + 125}, {x + m * 100, y + 125}}, {31, 19, 92});
-    polygon({{x + m * 100, y + 125}, {x + m * 150, y + 125}, {x + m * 150, y + 135}, {x + m * 100, y + 135}}, {41, 0, 70});
+    polygon({{x + m * 100, y + 115}, {x + m * 150, y + 115}, {x + m * 150, y + 125}, {x + m * 100, y + 125}}, windowDarkBottom);
+    polygon({{x + m * 100, y + 125}, {x + m * 150, y + 125}, {x + m * 150, y + 135}, {x + m * 100, y + 135}}, windowDarkTop);
 
-    polygon({{x + m * 160, y + 115}, {x + m * 180, y + 115}, {x + m * 180, y + 125}, {x + m * 160, y + 125}}, {23, 125, 122});
-    polygon({{x + m * 160, y + 125}, {x + m * 180, y + 125}, {x + m * 180, y + 135}, {x + m * 160, y + 135}}, {39, 80, 92});
+    polygon({{x + m * 160, y + 115}, {x + m * 180, y + 115}, {x + m * 180, y + 125}, {x + m * 160, y + 125}}, SecondwindowDarkBottom);
+    polygon({{x + m * 160, y + 125}, {x + m * 180, y + 125}, {x + m * 180, y + 135}, {x + m * 160, y + 135}}, SecondwindowDarkTop);
 
-    polygon({{x + m * 190, y + 115}, {x + m * 200, y + 115}, {x + m * 200, y + 125}, {x + m * 190, y + 125}}, {31, 19, 92});
-    polygon({{x + m * 190, y + 125}, {x + m * 200, y + 125}, {x + m * 200, y + 135}, {x + m * 190, y + 135}}, {41, 0, 70});
+    polygon({{x + m * 190, y + 115}, {x + m * 200, y + 115}, {x + m * 200, y + 125}, {x + m * 190, y + 125}}, windowDarkBottom);
+    polygon({{x + m * 190, y + 125}, {x + m * 200, y + 125}, {x + m * 200, y + 135}, {x + m * 190, y + 135}}, windowDarkTop);
 
     // Window Layer Five
-    polygon({{x + m * 0, y + 160}, {x + m * 20, y + 160}, {x + m * 20, y + 170}, {x + m * 0, y + 170}}, {7, 79, 178});
-    polygon({{x + m * 0, y + 170}, {x + m * 20, y + 170}, {x + m * 20, y + 180}, {x + m * 0, y + 180}}, {18, 43, 135});
+    polygon({{x + m * 0, y + 160}, {x + m * 20, y + 160}, {x + m * 20, y + 170}, {x + m * 0, y + 170}}, SecondwindowLightBottom);
+    polygon({{x + m * 0, y + 170}, {x + m * 20, y + 170}, {x + m * 20, y + 180}, {x + m * 0, y + 180}}, windowLightTop);
 
-    polygon({{x + m * 30, y + 160}, {x + m * 50, y + 160}, {x + m * 50, y + 170}, {x + m * 30, y + 170}}, {34, 203, 197});
-    polygon({{x + m * 30, y + 170}, {x + m * 50, y + 170}, {x + m * 50, y + 180}, {x + m * 30, y + 180}}, {19, 122, 117});
+    polygon({{x + m * 30, y + 160}, {x + m * 50, y + 160}, {x + m * 50, y + 170}, {x + m * 30, y + 170}}, windowLightBottom);
+    polygon({{x + m * 30, y + 170}, {x + m * 50, y + 170}, {x + m * 50, y + 180}, {x + m * 30, y + 180}}, windowLightTop);
 
-    polygon({{x + m * 60, y + 160}, {x + m * 80, y + 160}, {x + m * 80, y + 170}, {x + m * 60, y + 170}}, {7, 79, 178});
-    polygon({{x + m * 60, y + 170}, {x + m * 80, y + 170}, {x + m * 80, y + 180}, {x + m * 60, y + 180}}, {18, 43, 135});
+    polygon({{x + m * 60, y + 160}, {x + m * 80, y + 160}, {x + m * 80, y + 170}, {x + m * 60, y + 170}}, SecondwindowLightBottom);
+    polygon({{x + m * 60, y + 170}, {x + m * 80, y + 170}, {x + m * 80, y + 180}, {x + m * 60, y + 180}}, windowLightTop);
 
-    polygon({{x + m * 90, y + 160}, {x + m * 100, y + 160}, {x + m * 100, y + 170}, {x + m * 90, y + 170}}, {7, 79, 178});
-    polygon({{x + m * 90, y + 170}, {x + m * 100, y + 170}, {x + m * 100, y + 180}, {x + m * 90, y + 180}}, {18, 43, 135});
+    polygon({{x + m * 90, y + 160}, {x + m * 100, y + 160}, {x + m * 100, y + 170}, {x + m * 90, y + 170}}, SecondwindowLightBottom);
+    polygon({{x + m * 90, y + 170}, {x + m * 100, y + 170}, {x + m * 100, y + 180}, {x + m * 90, y + 180}}, windowLightTop);
 
-    polygon({{x + m * 100, y + 160}, {x + m * 110, y + 160}, {x + m * 110, y + 170}, {x + m * 100, y + 170}}, {31, 19, 92});
-    polygon({{x + m * 100, y + 170}, {x + m * 110, y + 170}, {x + m * 110, y + 180}, {x + m * 100, y + 180}}, {41, 0, 70});
+    polygon({{x + m * 100, y + 160}, {x + m * 110, y + 160}, {x + m * 110, y + 170}, {x + m * 100, y + 170}}, windowDarkBottom);
+    polygon({{x + m * 100, y + 170}, {x + m * 110, y + 170}, {x + m * 110, y + 180}, {x + m * 100, y + 180}}, windowDarkTop);
 
-    polygon({{x + m * 120, y + 160}, {x + m * 140, y + 160}, {x + m * 140, y + 170}, {x + m * 120, y + 170}}, {31, 19, 92});
-    polygon({{x + m * 120, y + 170}, {x + m * 140, y + 170}, {x + m * 140, y + 180}, {x + m * 120, y + 180}}, {41, 0, 70});
+    polygon({{x + m * 120, y + 160}, {x + m * 140, y + 160}, {x + m * 140, y + 170}, {x + m * 120, y + 170}}, windowDarkBottom);
+    polygon({{x + m * 120, y + 170}, {x + m * 140, y + 170}, {x + m * 140, y + 180}, {x + m * 120, y + 180}}, windowDarkTop);
 
-    polygon({{x + m * 150, y + 160}, {x + m * 170, y + 160}, {x + m * 170, y + 170}, {x + m * 150, y + 170}}, {31, 19, 92});
-    polygon({{x + m * 150, y + 170}, {x + m * 170, y + 170}, {x + m * 170, y + 180}, {x + m * 150, y + 180}}, {41, 0, 70});
+    polygon({{x + m * 150, y + 160}, {x + m * 170, y + 160}, {x + m * 170, y + 170}, {x + m * 150, y + 170}}, windowDarkBottom);
+    polygon({{x + m * 150, y + 170}, {x + m * 170, y + 170}, {x + m * 170, y + 180}, {x + m * 150, y + 180}}, windowDarkTop);
 
-    polygon({{x + m * 180, y + 160}, {x + m * 200, y + 160}, {x + m * 200, y + 170}, {x + m * 180, y + 170}}, {23, 125, 122});
-    polygon({{x + m * 180, y + 170}, {x + m * 200, y + 170}, {x + m * 200, y + 180}, {x + m * 180, y + 180}}, {39, 80, 92});
+    polygon({{x + m * 180, y + 160}, {x + m * 200, y + 160}, {x + m * 200, y + 170}, {x + m * 180, y + 170}}, SecondwindowDarkBottom);
+    polygon({{x + m * 180, y + 170}, {x + m * 200, y + 170}, {x + m * 200, y + 180}, {x + m * 180, y + 180}}, SecondwindowDarkTop);
 
     // Window Layer Six
-    polygon({{x + m * 0, y + 195}, {x + m * 50, y + 195}, {x + m * 50, y + 205}, {x + m * 0, y + 205}}, {34, 203, 197});
-    polygon({{x + m * 0, y + 205}, {x + m * 50, y + 205}, {x + m * 50, y + 215}, {x + m * 0, y + 215}}, {19, 122, 117});
+    polygon({{x + m * 0, y + 195}, {x + m * 50, y + 195}, {x + m * 50, y + 205}, {x + m * 0, y + 205}}, windowLightBottom);
+    polygon({{x + m * 0, y + 205}, {x + m * 50, y + 205}, {x + m * 50, y + 215}, {x + m * 0, y + 215}}, windowLightTop);
 
-    polygon({{x + m * 60, y + 195}, {x + m * 100, y + 195}, {x + m * 100, y + 205}, {x + m * 60, y + 205}}, {34, 203, 197});
-    polygon({{x + m * 60, y + 205}, {x + m * 100, y + 205}, {x + m * 100, y + 215}, {x + m * 60, y + 215}}, {19, 122, 117});
+    polygon({{x + m * 60, y + 195}, {x + m * 100, y + 195}, {x + m * 100, y + 205}, {x + m * 60, y + 205}}, windowLightBottom);
+    polygon({{x + m * 60, y + 205}, {x + m * 100, y + 205}, {x + m * 100, y + 215}, {x + m * 60, y + 215}}, windowLightTop);
 
-    polygon({{x + m * 100, y + 195}, {x + m * 140, y + 195}, {x + m * 140, y + 205}, {x + m * 100, y + 205}}, {23, 125, 122});
-    polygon({{x + m * 100, y + 205}, {x + m * 140, y + 205}, {x + m * 140, y + 215}, {x + m * 100, y + 215}}, {39, 80, 92});
+    polygon({{x + m * 100, y + 195}, {x + m * 140, y + 195}, {x + m * 140, y + 205}, {x + m * 100, y + 205}}, SecondwindowDarkBottom);
+    polygon({{x + m * 100, y + 205}, {x + m * 140, y + 205}, {x + m * 140, y + 215}, {x + m * 100, y + 215}}, SecondwindowDarkTop);
 
-    polygon({{x + m * 150, y + 195}, {x + m * 200, y + 195}, {x + m * 200, y + 205}, {x + m * 150, y + 205}}, {31, 19, 92});
-    polygon({{x + m * 150, y + 205}, {x + m * 200, y + 205}, {x + m * 200, y + 215}, {x + m * 150, y + 215}}, {41, 0, 70});
+    polygon({{x + m * 150, y + 195}, {x + m * 200, y + 195}, {x + m * 200, y + 205}, {x + m * 150, y + 205}}, windowDarkBottom);
+    polygon({{x + m * 150, y + 205}, {x + m * 200, y + 205}, {x + m * 200, y + 215}, {x + m * 150, y + 215}}, windowDarkTop);
 
     // Window Layer Seven
-    polygon({{x + m * 0, y + 225}, {x + m * 30, y + 225}, {x + m * 30, y + 232}, {x + m * 0, y + 232}}, {34, 203, 197});
-    polygon({{x + m * 0, y + 232}, {x + m * 30, y + 232}, {x + m * 30, y + 240}, {x + m * 0, y + 240}}, {19, 122, 117});
+    polygon({{x + m * 0, y + 225}, {x + m * 30, y + 225}, {x + m * 30, y + 232}, {x + m * 0, y + 232}}, windowLightBottom);
+    polygon({{x + m * 0, y + 232}, {x + m * 30, y + 232}, {x + m * 30, y + 240}, {x + m * 0, y + 240}}, windowLightTop);
 
-    polygon({{x + m * 40, y + 225}, {x + m * 70, y + 225}, {x + m * 70, y + 232}, {x + m * 40, y + 232}}, {7, 79, 178});
-    polygon({{x + m * 40, y + 232}, {x + m * 70, y + 232}, {x + m * 70, y + 240}, {x + m * 40, y + 240}}, {18, 43, 135});
+    polygon({{x + m * 40, y + 225}, {x + m * 70, y + 225}, {x + m * 70, y + 232}, {x + m * 40, y + 232}}, SecondwindowLightBottom);
+    polygon({{x + m * 40, y + 232}, {x + m * 70, y + 232}, {x + m * 70, y + 240}, {x + m * 40, y + 240}}, windowLightTop);
 
-    polygon({{x + m * 80, y + 225}, {x + m * 100, y + 225}, {x + m * 100, y + 232}, {x + m * 80, y + 232}}, {34, 203, 197});
-    polygon({{x + m * 80, y + 232}, {x + m * 100, y + 232}, {x + m * 100, y + 240}, {x + m * 80, y + 240}}, {19, 122, 117});
+    polygon({{x + m * 80, y + 225}, {x + m * 100, y + 225}, {x + m * 100, y + 232}, {x + m * 80, y + 232}}, windowLightBottom);
+    polygon({{x + m * 80, y + 232}, {x + m * 100, y + 232}, {x + m * 100, y + 240}, {x + m * 80, y + 240}}, windowLightTop);
 
-    polygon({{x + m * 100, y + 225}, {x + m * 120, y + 225}, {x + m * 120, y + 232}, {x + m * 100, y + 232}}, {23, 125, 122});
-    polygon({{x + m * 100, y + 232}, {x + m * 120, y + 232}, {x + m * 120, y + 240}, {x + m * 100, y + 240}}, {39, 80, 92});
+    polygon({{x + m * 100, y + 225}, {x + m * 120, y + 225}, {x + m * 120, y + 232}, {x + m * 100, y + 232}}, SecondwindowDarkBottom);
+    polygon({{x + m * 100, y + 232}, {x + m * 120, y + 232}, {x + m * 120, y + 240}, {x + m * 100, y + 240}}, SecondwindowDarkTop);
 
-    polygon({{x + m * 130, y + 225}, {x + m * 160, y + 225}, {x + m * 160, y + 232}, {x + m * 130, y + 232}}, {23, 125, 122});
-    polygon({{x + m * 130, y + 232}, {x + m * 160, y + 232}, {x + m * 160, y + 240}, {x + m * 130, y + 240}}, {39, 80, 92});
+    polygon({{x + m * 130, y + 225}, {x + m * 160, y + 225}, {x + m * 160, y + 232}, {x + m * 130, y + 232}}, SecondwindowDarkBottom);
+    polygon({{x + m * 130, y + 232}, {x + m * 160, y + 232}, {x + m * 160, y + 240}, {x + m * 130, y + 240}}, SecondwindowDarkTop);
 
-    polygon({{x + m * 170, y + 225}, {x + m * 200, y + 225}, {x + m * 200, y + 232}, {x + m * 170, y + 232}}, {23, 125, 122});
-    polygon({{x + m * 170, y + 232}, {x + m * 200, y + 232}, {x + m * 200, y + 240}, {x + m * 170, y + 240}}, {39, 80, 92});
+    polygon({{x + m * 170, y + 225}, {x + m * 200, y + 225}, {x + m * 200, y + 232}, {x + m * 170, y + 232}}, SecondwindowDarkBottom);
+    polygon({{x + m * 170, y + 232}, {x + m * 200, y + 232}, {x + m * 200, y + 240}, {x + m * 170, y + 240}}, SecondwindowDarkTop);
 }
 
 void Shadow_Building_One(float x, float y, int m = 1, Color shadow = {19, 23, 69}){
@@ -1336,6 +1589,56 @@ void Shadow_Building_Three(float x, float y, Color shadow = {19, 23, 69}){
 
     polygon({{x + 20, y + 295}, {x + 40, y + 295}, {x + 40, y + 300}, {x + 20, y + 300}}, shadow);
     polygon({{x + 10, y + 300}, {x + 50, y + 300}, {x + 50, y + 310}, {x + 10, y + 310}}, shadow);
+}
+
+/// SignBoard Building 2nd
+void SignBoard2(float x, float y, Color body = {211, 0, 253}, Color light = {111, 81, 143}){
+    /// Poles
+    polygon({{x + 0, y + 0}, {x + 30, y + 0}, {x + 30, y + 5}, {x + 0, y + 5}}, {22, 28, 40});
+    polygon({{x + 0, y + 5}, {x + 30, y + 5}, {x + 30, y + 35}, {x + 0, y + 35}}, {53, 59, 107});
+    polygon({{x + 0, y + 35}, {x + 30, y + 35}, {x + 30, y + 40}, {x + 0, y + 40}}, {22, 28, 40});
+
+    /// Body
+    polygon({{x - 10 , y - 10}, {x + 15, y - 10}, {x + 15, y + 50}, {x - 10, y + 50}}, body);
+    polygon({{x - 5 , y + 50}, {x + 10, y + 50}, {x + 10, y + 55}, {x - 5, y + 55}}, body);
+    polygon({{x - 5 , y - 15}, {x + 10, y - 15}, {x + 10, y - 10}, {x - 5, y - 10}}, body);
+
+    /// Light
+    polygon({{x - 15 , y - 10}, {x - 10, y - 10}, {x - 10, y + 50}, {x - 15, y + 50}}, light);
+    polygon({{x + 15 , y - 10}, {x + 20, y - 10}, {x + 20, y + 50}, {x + 15, y + 50}}, light);
+    polygon({{x - 10 , y + 50}, {x - 5, y + 50}, {x - 5, y + 55}, {x - 10, y + 55}}, light);
+    polygon({{x + 10 , y + 50}, {x + 15, y + 50}, {x + 15, y + 55}, {x + 10, y + 55}}, light);
+    polygon({{x - 5 , y + 55}, {x + 10, y + 55}, {x + 10, y + 60}, {x - 5, y + 60}}, light);
+    polygon({{x - 5 , y - 20}, {x + 10, y - 20}, {x + 10, y - 15}, {x - 5, y - 15}}, light);
+    polygon({{x - 10 , y - 15}, {x - 5, y - 15}, {x - 5, y - 10}, {x - 10, y - 10}}, light);
+    polygon({{x + 10 , y - 15}, {x + 15, y - 15}, {x + 15, y - 10}, {x + 10, y - 10}}, light);
+
+    /// Objects
+    polygon({{x - 5 , y + 0}, {x + 10, y + 0}, {x + 10, y + 5}, {x - 5, y + 5}}, light);
+    polygon({{x - 5 , y + 35}, {x + 10, y + 35}, {x + 10, y + 40}, {x - 5, y + 40}}, light);
+    polygon({{x - 5 , y + 15}, {x + 10, y + 15}, {x + 10, y + 20}, {x - 5, y + 20}}, light);
+    polygon({{x + 0 , y + 20}, {x + 10, y + 20}, {x + 10, y + 25}, {x + 0, y + 25}}, light);
+}
+
+/// SignBoard Building 13th
+void SignBoard13(float x, float y, Color light = {110, 115, 153}){
+    /// Poles
+    polygon({{x + 0, y + 0}, {x + 30, y + 0}, {x + 30, y + 5}, {x + 0, y + 5}}, {22, 28, 40});
+    polygon({{x + 0, y + 5}, {x + 30, y + 5}, {x + 30, y + 35}, {x + 0, y + 35}}, {53, 59, 107});
+    polygon({{x + 0, y + 35}, {x + 30, y + 35}, {x + 30, y + 40}, {x + 0, y + 40}}, {22, 28, 40});
+
+    /// Body
+    polygon({{x - 10 , y - 10}, {x + 15, y - 10}, {x + 15, y + 50}, {x - 10, y + 50}}, {0, 252, 161});
+
+    /// Light
+    polygon({{x - 15 , y - 5}, {x - 10, y - 5}, {x - 10, y + 50}, {x - 15, y + 50}}, light);
+    polygon({{x + 15 , y - 5}, {x + 20, y - 5}, {x + 20, y + 50}, {x + 15, y + 50}}, light);
+    polygon({{x - 10 , y + 50}, {x + 15, y + 50}, {x + 15, y + 55}, {x - 10, y + 55}}, light);
+    polygon({{x - 10 , y - 10}, {x + 15, y - 10}, {x + 15, y - 5}, {x - 10, y - 5}}, light);
+
+    /// Lower Object
+    polygon({{x - 10 , y - 10}, {x + 15, y - 10}, {x + 15, y + 10}, {x + 10, y + 10}, {x + 10, y + 5}, {x - 10, y + 5}}, {46, 0, 251});
+    polygon({{x - 10 , y + 30}, {x + 15, y + 30}, {x + 15, y + 40}, {x + 10, y + 40}, {x + 10, y + 25}, {x - 10, y + 25}}, {114, 195, 204});
 }
 
 void setGLColorWithAlpha(const Color& color, int alpha) {
@@ -1376,6 +1679,7 @@ void Laser(float x, float y, Color shadow = {97, 252, 254}, int alpha = 100){
     glPopMatrix();
 }
 
+/// Initializing Buildings
 void Building(){
     // Building One
     Building_One(0, 0);
@@ -1395,14 +1699,13 @@ void Building(){
     Third_Building(200, 0);
     NetworkTowerThree(230, 505);
 
-    // Building Four
-    Tomb(320, 0);
+
 
     // Building Five
     Fifth_Building(420, 0);
     SignBoard_Two(420, 435);
 
-    // Building Five
+    // Building Six
     Building_Two(520, 0);
     NetworkTowerTwo(535, 220);
 
@@ -1431,8 +1734,7 @@ void Building(){
     Building_Tower(950, 220);
     glPopMatrix();
 
-    // Building Nine
-    Tomb(1070, 0);
+
 
     // Building Twelve
     Building_One(1380, 0);
@@ -1466,6 +1768,12 @@ void Building(){
         }
     }
 
+    // Building Four
+    Tomb(320, 0);
+
+    // Building Nine
+    Tomb(1070, 0);
+
     // Sixteenth Building
     Tomb(1850, 0);
 }
@@ -1477,7 +1785,7 @@ void display()
 
     // Stars
     if(night){
-        Star();
+        Stars();
     }
 
     // Clouds
@@ -1495,6 +1803,10 @@ void display()
 
     // Signboards
     moveGhost();
+    LightOnOff();
+
+    SignBoard2(185, 335);
+    SignBoard13(1705, 315);
 
     glFlush();
     glutSwapBuffers();
@@ -1536,6 +1848,9 @@ void updates(){
     glutTimerFunc(100, updateGhost, 0);
     glutTimerFunc(100, updateDonute, 0);
     glutTimerFunc(50, updateLaserObjects, 0);
+    glutTimerFunc(100, updateLights, 0);
+    glutTimerFunc(100, updateLights2, 0);
+    glutTimerFunc(100, updateLights3, 0);
 }
 
 void init(void)

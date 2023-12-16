@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1702182121 source:c:\users\omar2\onedrive\desktop\virtual_city\main.cpp
+1702486389 source:c:\users\omar2\onedrive\desktop\virtual_city\main.cpp
 	<iostream>
 	<GL/freeglut.h>
 	<GL/gl.h>
@@ -883,4 +883,7 @@
 
 1526093416 c:\program files\codeblocks\mingw\x86_64-w64-mingw32\include\math.h
 	<crtdefs.h>
+
+1632060799 c:\program files\codeblocks\mingw\x86_64-w64-mingw32\include\gl\glut.h
+	"freeglut_std.h"
 
