@@ -1,3 +1,20 @@
+
+
+
+///  Virtual Cityscape  ///
+
+///////////////////////////
+/// Mohammad Omar       ///
+/// 20-43430-1          ///
+/// Group 04            ///
+///////////////////////////
+
+
+
+
+
+
+
 #include <iostream>
 #include <GL/freeglut.h>
 #include <GL/gl.h>
@@ -286,7 +303,7 @@ void updateCarrier(int value) {
     glutTimerFunc(1, updateCarrier, 0);
 }
 
-void moveCarrer(){
+void moveCarrier(){
     glPushMatrix();
     glScalef(0.5, 0.5,0.0);
     carrier(carrierPosition, 1000);
@@ -316,7 +333,7 @@ void updateCarrierTwo(int value) {
     glutTimerFunc(1, updateCarrierTwo, 0);
 }
 
-void moveCarrerTwo(){
+void moveCarrierTwo(){
     glPushMatrix();
     glScalef(0.5, 0.5,0.0);
     carrierTwo(carrierTwoPosition, 550);
@@ -1824,6 +1841,7 @@ void Building(){
     Tomb(1850, 0);
 }
 
+
 void display()
 {
    /// Sky
@@ -1839,14 +1857,13 @@ void display()
 
     /// Clouds
     drawClouds();
-
     // Building
     Building();
 
     /// Plane and Carrier
     movePlane();
-    moveCarrer();
-    moveCarrerTwo();
+    moveCarrier();
+    moveCarrierTwo();
 
     /// Signboards
     moveGhost();
@@ -1935,7 +1952,7 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_MULTISAMPLE);
     glutInitWindowPosition(0, 0);
     glutInitWindowSize(1920, 1080);
-    glutCreateWindow("Metro Mosaic");
+    glutCreateWindow("Virtual Cityscape");
     glutKeyboardFunc(keyboard);
     glutFullScreen();
     init();
