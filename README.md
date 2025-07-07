@@ -4,8 +4,6 @@
 
 ---
 
-
-
 ##  Features
 
 -  **Cityscape Rendering**: Real-time visualization of buildings and skyline.
@@ -44,8 +42,6 @@ g++ main.cpp -o VirtualCity -lGL -lGLU -lglut
 | 4 | Disable Laser Light |
 | 5 | Activate Rain Mode |
 | 6 | Deactivate Rain Mode |
-
-
 
 ### 4. Technologies Used
 
